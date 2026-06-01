@@ -131,6 +131,9 @@ export default function Navbar() {
                     </span>
                   )}
                 </Link>
+                <Link href="/match" className={isActive('/match')} onClick={closeMenu}>
+                  SkillMatch
+                </Link>
                 <Link href="/chat" className={isActive('/chat')} onClick={closeMenu} style={{ position: 'relative' }}>
                   Chat
                   {unreadChatCount > 0 && (

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../../../lib/supabase';
 import { useRouter } from 'next/navigation';
-import { Check, X, Clock, Plus, GitBranch, Trash2, AlertTriangle } from 'lucide-react';
+import { Check, X, Clock, Plus, GitBranch, Trash2, AlertTriangle, Sparkles, Cpu } from 'lucide-react';
 import BackButton from '../../../../components/BackButton';
 import Link from 'next/link';
 
@@ -28,6 +28,91 @@ export default function ManageProject({ params }: { params: { id: string } }) {
 
   const [decliningAppId, setDecliningAppId] = useState<string | null>(null);
   const [declineFeedback, setDeclineFeedback] = useState<string>("");
+
+  // AI Roadmap Generation States
+  const [aiGenerating, setAiGenerating] = useState(false);
+  const [aiRoadmap, setAiRoadmap] = useState<any[]>([]);
+  const [aiError, setAiError] = useState<string | null>(null);
+  const [publishingRoadmap, setPublishingRoadmap] = useState(false);
+
+  const handleGenerateRoadmap = async () => {
+    setAiGenerating(true);
+    setAiError(null);
+    setAiRoadmap([]);
+
+    try {
+      const response = await fetch('/api/ai/generate-roadmap', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ projectId: id })
+      });
+
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(payload?.error || 'Failed to generate roadmap');
+      }
+
+      setAiRoadmap(payload.roadmap);
+    } catch (err: any) {
+      setAiError(err.message || 'Something went wrong.');
+    } finally {
+      setAiGenerating(false);
+    }
+  };
+
+  const handlePublishRoadmap = async () => {
+    if (aiRoadmap.length === 0) return;
+    setPublishingRoadmap(true);
+
+    try {
+      const milestonesToInsert = aiRoadmap.map((item: any) => ({
+        project_id: id,
+        title: item.title,
+        description: JSON.stringify({
+          desc: item.description,
+          due: '',
+          assigned: '',
+          completed: false,
+          completed_at: ''
+        })
+      }));
+
+      const { data, error } = await supabase
+        .from('milestones')
+        .insert(milestonesToInsert)
+        .select();
+
+      if (error) {
+        alert(error.message);
+      } else if (data) {
+        setMilestones([...data, ...milestones]);
+        setAiRoadmap([]);
+      }
+    } catch (err: any) {
+      alert(err.message || 'Failed to publish roadmap.');
+    } finally {
+      setPublishingRoadmap(false);
+    }
+  };
+
+  const handleDeleteMilestone = async (milestoneId: string) => {
+    if (!confirm('Are you sure you want to delete this milestone?')) return;
+
+    try {
+      const { error } = await supabase
+        .from('milestones')
+        .delete()
+        .eq('id', milestoneId);
+
+      if (error) {
+        alert(error.message);
+      } else {
+        setMilestones(milestones.filter(m => m.id !== milestoneId));
+      }
+    } catch (err: any) {
+      alert(err.message || 'Failed to delete milestone.');
+    }
+  };
 
   useEffect(() => {
     async function loadData() {
@@ -368,7 +453,92 @@ export default function ManageProject({ params }: { params: { id: string } }) {
           </div>
 
           <div>
-            <h2 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '16px' }}>BuildTrack</h2>
+            <h2 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              BuildTrack & AI Architect
+            </h2>
+
+            {/* AI Roadmap Generator Widget */}
+            <div className="glass-card" style={{ padding: '24px', marginBottom: '24px', borderLeft: '4px solid var(--accent-violet)', background: 'rgba(255,255,255,0.01)', position: 'relative' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                <div style={{ background: 'rgba(168, 85, 247, 0.15)', color: 'var(--accent-violet)', padding: '4px 10px', borderRadius: '12px', fontSize: '0.7rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  <Sparkles size={11} /> AI Powered
+                </div>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)' }}>Llama 3.1 BuildPlan Architect</h3>
+              </div>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: 1.5, marginBottom: '16px' }}>
+                Instantly outline a robust, customized 4-week timeline for your project, explicitly allocating weekly duties to active team members based on their skills.
+              </p>
+
+              {aiGenerating ? (
+                <div style={{ padding: '16px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', textAlign: 'center' }}>
+                  <div style={{ border: '3px solid rgba(168, 85, 247, 0.1)', borderTop: '3px solid var(--accent-violet)', borderRadius: '50%', width: '32px', height: '32px', animation: 'spin 1s linear infinite' }} className="animate-spin"></div>
+                  <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 500 }} className="animate-pulse">
+                    Analyzing active team skills & structuring sprints...
+                  </div>
+                </div>
+              ) : aiRoadmap.length > 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginTop: '16px', background: 'rgba(0,0,0,0.2)', padding: '18px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.04)' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--accent-violet)', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '8px', marginBottom: '8px' }}>
+                    Proposed 4-Week AI Roadmap
+                  </div>
+                  
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                    {aiRoadmap.map((item, idx) => (
+                      <div key={idx} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                        <div style={{ background: 'rgba(168, 85, 247, 0.12)', color: 'var(--accent-violet)', width: '22px', height: '22px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 700, marginTop: '2px', flexShrink: 0 }}>
+                          {idx + 1}
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <h4 style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)' }}>{item.title}</h4>
+                          <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.4, marginTop: '4px' }}>{item.description}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '10px', marginTop: '16px', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '12px' }}>
+                    <button 
+                      onClick={handlePublishRoadmap} 
+                      disabled={publishingRoadmap} 
+                      className="btn-glow" 
+                      style={{ flex: 1, fontSize: '0.8rem', padding: '8px 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', background: 'linear-gradient(135deg, #10B981, #059669)', border: 'none', boxShadow: '0 4px 12px rgba(16,185,129,0.2)' }}
+                    >
+                      <Check size={14} /> {publishingRoadmap ? 'Publishing...' : 'Publish AI Plan to Timeline'}
+                    </button>
+                    <button 
+                      onClick={() => setAiRoadmap([])} 
+                      className="btn-ghost" 
+                      style={{ fontSize: '0.8rem', padding: '8px 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', border: '1px solid var(--border-subtle)' }}
+                    >
+                      <Trash2 size={14} /> Discard
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  {aiError && (
+                    <div style={{ padding: '10px', background: 'rgba(239, 68, 68, 0.1)', color: '#EF4444', borderRadius: '8px', fontSize: '0.8rem', marginBottom: '12px', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+                      {aiError}
+                    </div>
+                  )}
+                  <button 
+                    onClick={handleGenerateRoadmap} 
+                    className="btn-ghost" 
+                    style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', borderColor: 'rgba(168, 85, 247, 0.4)', background: 'rgba(168, 85, 247, 0.05)', color: 'var(--accent-violet)', fontWeight: 600, fontSize: '0.9rem', padding: '12px', borderRadius: '14px' }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'rgba(168, 85, 247, 0.1)';
+                      e.currentTarget.style.boxShadow = '0 0 15px -3px rgba(168, 85, 247, 0.3)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'rgba(168, 85, 247, 0.05)';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
+                  >
+                    <Sparkles size={16} /> Generate AI Project Roadmap
+                  </button>
+                </div>
+              )}
+            </div>
             
             <div className="glass-card" style={{ padding: '24px', marginBottom: '24px' }}>
               <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '16px' }}>Post New Milestone</h3>
@@ -451,8 +621,19 @@ export default function ManageProject({ params }: { params: { id: string } }) {
                     <div key={m.id} className="glass-card" style={{ padding: '20px', borderColor: details.completed ? 'rgba(16, 185, 129, 0.3)' : isOverdue ? 'rgba(248, 113, 113, 0.3)' : undefined }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px', flexWrap: 'wrap', gap: '8px' }}>
                         <h4 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>{m.title}</h4>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                          Added {new Date(m.created_at).toLocaleDateString()}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                            Added {new Date(m.created_at).toLocaleDateString()}
+                          </span>
+                          <button 
+                            onClick={() => handleDeleteMilestone(m.id)}
+                            style={{ background: 'transparent', color: '#F87171', opacity: 0.7, border: 'none', padding: '4px', borderRadius: '6px', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                            onMouseEnter={(e) => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.background = 'rgba(248, 113, 113, 0.1)'; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.opacity = '0.7'; e.currentTarget.style.background = 'transparent'; }}
+                            title="Delete Milestone"
+                          >
+                            <Trash2 size={15} />
+                          </button>
                         </div>
                       </div>
                       <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.6, margin: '0 0 16px 0' }}>{details.desc}</p>
