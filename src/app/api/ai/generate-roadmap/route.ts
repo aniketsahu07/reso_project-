@@ -50,7 +50,7 @@ export async function POST(request: Request) {
     }
 
     // 2. Fetch accepted team members from applications
-    const { data: apps, error: appsError } = await supabaseAdmin
+    const { data: apps } = await supabaseAdmin
       .from('applications')
       .select('applicant_id')
       .eq('project_id', projectId)

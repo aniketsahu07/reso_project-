@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../../../lib/supabase';
 import { useRouter } from 'next/navigation';
-import { Check, X, Clock, Plus, GitBranch, Trash2, AlertTriangle, Sparkles, Cpu } from 'lucide-react';
+import { Check, X, Clock, Plus, GitBranch, Trash2, AlertTriangle, Sparkles } from 'lucide-react';
 import BackButton from '../../../../components/BackButton';
 import Link from 'next/link';
 

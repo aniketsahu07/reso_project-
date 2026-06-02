@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Sparkles, Cpu, Award, Users, Clock, ArrowRight, ShieldCheck, CheckCircle2, User } from 'lucide-react';
+import { Sparkles, Cpu, Award, Users, Clock, ArrowRight, ShieldCheck, CheckCircle2 } from 'lucide-react';
 
 import { useAuth } from '../../components/AuthProvider';
 import { supabase } from '../../lib/supabase';
@@ -19,6 +19,7 @@ export default function SkillMatchPage() {
   // User Profile States to display context radar
   const [userProfile, setUserProfile] = useState<any>(null);
   const [userSkills, setUserSkills] = useState<string[]>([]);
+  const [showAllSkills, setShowAllSkills] = useState(false);
 
   useEffect(() => {
     async function loadAiMatches() {
@@ -149,15 +150,37 @@ export default function SkillMatchPage() {
               AI Analyzed Competencies ({userSkills.length})
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-              {userSkills.slice(0, 8).map(skill => (
+              {(showAllSkills ? userSkills : userSkills.slice(0, 8)).map(skill => (
                 <span key={skill} style={{ fontSize: '0.75rem', background: 'rgba(255, 255, 255, 0.04)', color: '#E4E4E7', border: '1px solid rgba(255, 255, 255, 0.08)', padding: '4px 10px', borderRadius: '20px', fontWeight: 500 }}>
                   {skill}
                 </span>
               ))}
               {userSkills.length > 8 && (
-                <span style={{ fontSize: '0.75rem', color: '#A855F7', background: 'rgba(168, 85, 247, 0.1)', padding: '4px 10px', borderRadius: '20px', fontWeight: 600 }}>
-                  +{userSkills.length - 8} More
-                </span>
+                <button 
+                  onClick={() => setShowAllSkills(!showAllSkills)}
+                  style={{ 
+                    fontSize: '0.75rem', 
+                    color: '#A855F7', 
+                    background: 'rgba(168, 85, 247, 0.1)', 
+                    border: '1px solid rgba(168, 85, 247, 0.25)',
+                    padding: '4px 10px', 
+                    borderRadius: '20px', 
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    outline: 'none'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'rgba(168, 85, 247, 0.2)';
+                    e.currentTarget.style.transform = 'scale(1.05)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'rgba(168, 85, 247, 0.1)';
+                    e.currentTarget.style.transform = 'scale(1)';
+                  }}
+                >
+                  {showAllSkills ? 'Show Less' : `+${userSkills.length - 8} More`}
+                </button>
               )}
             </div>
           </div>
@@ -171,11 +194,11 @@ export default function SkillMatchPage() {
             <div key={n} className="glass-panel" style={{ height: '340px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', position: 'relative', overflow: 'hidden' }}>
               <div style={{ height: '3px', width: '100%', position: 'absolute', top: 0, left: 0, background: 'rgba(255,255,255,0.05)' }}></div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <div style={{ background: 'rgba(255, 255, 255, 0.04)', height: '18px', width: '80px', borderRadius: '4px', className: 'animate-pulse' }}></div>
-                <div style={{ background: 'rgba(255, 255, 255, 0.04)', height: '24px', width: '60px', borderRadius: '8px', className: 'animate-pulse' }}></div>
+                <div className="animate-pulse" style={{ background: 'rgba(255, 255, 255, 0.04)', height: '18px', width: '80px', borderRadius: '4px' }}></div>
+                <div className="animate-pulse" style={{ background: 'rgba(255, 255, 255, 0.04)', height: '24px', width: '60px', borderRadius: '8px' }}></div>
               </div>
-              <div style={{ background: 'rgba(255, 255, 255, 0.04)', height: '32px', width: '70%', borderRadius: '6px', className: 'animate-pulse' }}></div>
-              <div style={{ background: 'rgba(255, 255, 255, 0.04)', height: '60px', width: '100%', borderRadius: '8px', className: 'animate-pulse' }}></div>
+              <div className="animate-pulse" style={{ background: 'rgba(255, 255, 255, 0.04)', height: '32px', width: '70%', borderRadius: '6px' }}></div>
+              <div className="animate-pulse" style={{ background: 'rgba(255, 255, 255, 0.04)', height: '60px', width: '100%', borderRadius: '8px' }}></div>
               <div style={{ display: 'flex', gap: '8px', marginTop: 'auto' }}>
                 <div style={{ background: 'rgba(255, 255, 255, 0.04)', height: '24px', width: '60px', borderRadius: '20px' }}></div>
                 <div style={{ background: 'rgba(255, 255, 255, 0.04)', height: '24px', width: '70px', borderRadius: '20px' }}></div>
