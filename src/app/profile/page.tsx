@@ -11,6 +11,7 @@ export default function Profile() {
   const [profile, setProfile] = useState<any>(null);
   const [portfolio, setPortfolio] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [avatarError, setAvatarError] = useState(false);
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
 
@@ -177,11 +178,36 @@ export default function Profile() {
 
           <div className="profile-title-area" style={{ display: 'flex', alignItems: 'flex-end', gap: '32px', position: 'relative', zIndex: 1, marginTop: '40px' }}>
             <div style={{ position: 'relative', flexShrink: 0 }}>
-              <img
-                src={profile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile?.full_name || 'Anonymous')}&background=6366f1&color=fff`}
-                alt={profile?.full_name}
-                style={{ width: '130px', height: '130px', borderRadius: '32px', border: '4px solid var(--bg-card)', objectFit: 'cover', background: 'var(--bg-card)', boxShadow: '0 8px 24px rgba(0,0,0,0.3)' }}
-              />
+              {profile?.avatar_url && !avatarError ? (
+                <img
+                  src={profile.avatar_url}
+                  alt={profile?.full_name}
+                  onError={() => setAvatarError(true)}
+                  style={{ width: '130px', height: '130px', borderRadius: '32px', border: '4px solid var(--bg-card)', objectFit: 'cover', background: 'var(--bg-card)', boxShadow: '0 8px 24px rgba(0,0,0,0.3)' }}
+                />
+              ) : (
+                <div
+                  aria-label={profile?.full_name}
+                  style={{
+                    width: '130px',
+                    height: '130px',
+                    borderRadius: '32px',
+                    border: '4px solid var(--bg-card)',
+                    background: 'linear-gradient(135deg, rgba(99,102,241,0.95) 0%, rgba(168,85,247,0.9) 100%)',
+                    boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#fff',
+                    fontSize: '3.2rem',
+                    fontWeight: 800,
+                    letterSpacing: '-0.06em',
+                    textTransform: 'uppercase'
+                  }}
+                >
+                  {(profile?.full_name || 'A').trim().charAt(0) || 'A'}
+                </div>
+              )}
               {profile?.open_to_collaborate && (
                 <div style={{ position: 'absolute', bottom: '-4px', right: '-4px', width: '28px', height: '28px', background: 'var(--accent-emerald)', border: '4px solid var(--bg-card)', borderRadius: '50%', boxShadow: '0 0 16px rgba(16,185,129,0.6)' }}></div>
               )}
