@@ -6,6 +6,14 @@ import { useRouter } from 'next/navigation';
 import { Clock, Users, GitCommit, Award, ChevronLeft, Calendar, Rocket, Send, ExternalLink, Crown } from 'lucide-react';
 import Link from 'next/link';
 
+function formatMetaValue(commitment: string): string {
+  const num = parseInt(commitment);
+  if (!isNaN(num)) {
+    return `${num} hr${num !== 1 ? 's' : ''}/wk`;
+  }
+  return commitment;
+}
+
 export default function ProjectDetail({ params }: { params: { id: string } }) {
   const router = useRouter();
   const { id } = params;
@@ -272,7 +280,7 @@ export default function ProjectDetail({ params }: { params: { id: string } }) {
               </div>
               <div className="body-text" style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)' }}>
                 <Clock size={16} />
-                {project.commitment}
+                {formatMetaValue(project.commitment)}
               </div>
               <div className="body-text" style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)' }}>
                 <Calendar size={16} />

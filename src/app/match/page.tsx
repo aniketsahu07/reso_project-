@@ -3,10 +3,17 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Cpu, Award, Users, Clock, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Cpu, Award, Users as UsersIcon, Clock as ClockIcon, ArrowRight } from 'lucide-react';
 
 import { useAuth } from '../../components/AuthProvider';
 import { supabase } from '../../lib/supabase';
+
+function truncateAtWord(text: string, maxChars: number): string {
+  if (!text) return '';
+  if (text.length <= maxChars) return text;
+  const truncated = text.slice(0, maxChars);
+  return truncated.slice(0, truncated.lastIndexOf(' ')) + '...';
+}
 
 export default function SkillMatchPage() {
   const router = useRouter();
@@ -20,6 +27,12 @@ export default function SkillMatchPage() {
   const [userProfile, setUserProfile] = useState<any>(null);
   const [userSkills, setUserSkills] = useState<string[]>([]);
   const [showAllSkills, setShowAllSkills] = useState(false);
+
+  const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({});
+
+  function toggleSkills(projectId: string) {
+    setExpandedCards(prev => ({ ...prev, [projectId]: !prev[projectId] }));
+  }
 
   useEffect(() => {
     async function loadAiMatches() {
@@ -73,6 +86,7 @@ export default function SkillMatchPage() {
             description: project.description,
             commitment: project.commitment,
             teamSize: project.team_size,
+            team_size: project.team_size,
             stage: project.stage,
             founder: project.users?.full_name || 'Anonymous',
             founderAvatar: project.users?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(project.users?.full_name || 'Anonymous')}&background=d0d7de&color=24292f`,
@@ -104,7 +118,7 @@ export default function SkillMatchPage() {
   const getMatchColor = (score: number) => {
     if (score >= 60) return { bg: 'rgba(34, 197, 94, 0.12)', text: '#22C55E', border: 'rgba(34, 197, 94, 0.28)', fg: '#ffffff', solid: '#22C55E' };
     if (score >= 40) return { bg: 'rgba(234, 88, 12, 0.12)', text: '#EA580C', border: 'rgba(234, 88, 12, 0.28)', fg: '#ffffff', solid: '#EA580C' };
-    return { bg: '#2a2a2a', text: '#9ca3af', border: '#333333', fg: '#f1f1f1', solid: '#2a2a2a', cardBg: '#2a2a2a' };
+    return { bg: 'rgba(156, 163, 175, 0.12)', text: '#9ca3af', border: '#374151', fg: '#f1f1f1', solid: '#4b5563' };
   };
 
   return (
@@ -236,7 +250,7 @@ export default function SkillMatchPage() {
               return (
                 <div
                   key={project.id}
-                  className="panel"
+                  className="panel border border-gray-700"
                   style={{
                     padding: '28px',
                     display: 'flex',
@@ -246,13 +260,14 @@ export default function SkillMatchPage() {
                     position: 'relative',
                     overflow: 'hidden',
                     cursor: 'default',
-                    background: styles.cardBg || 'var(--bg-card)'
+                    background: 'var(--bg-card)',
+                    border: project.matchScore >= 40 ? `1px solid ${styles.border}` : undefined
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.borderColor = styles.text;
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = 'var(--border-color)';
+                    e.currentTarget.style.borderColor = project.matchScore >= 40 ? styles.border : '';
                   }}
                 >
                   <div style={{ height: '3px', width: '100%', position: 'absolute', top: 0, left: 0, background: styles.text }}></div>
@@ -283,74 +298,218 @@ export default function SkillMatchPage() {
 
                   {/* Project Description */}
                   <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.6, margin: '0 0 16px 0', minHeight: '68px', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                    {project.description}
+                    {truncateAtWord(project.description, 120)}
                   </p>
 
                   {/* Detailed Skill Synergy Analysis */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', borderTop: '1px solid var(--border-subtle)', paddingTop: '16px', fontSize: '0.8rem', marginTop: '12px' }}>
-                    <div style={{ fontWeight: 500, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <ShieldCheck size={14} color="var(--semantic-success)" />
-                      Skill Synergy
-                    </div>
+                  <hr className="border-t border-gray-700 my-3" />
+                  {project.matchScore === 0 ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.8rem' }}>
+                      <div style={{ fontWeight: 500, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        Skills Needed
+                      </div>
 
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', alignItems: 'center' }}>
-                      {project.matchedSkills.slice(0, 4).map((skill: string) => (
-                        <span key={skill} style={{
-                          padding: '2px 7px',
-                          borderRadius: 'var(--radius-md)',
-                          background: 'var(--semantic-success-bg)',
-                          border: '1px solid var(--semantic-success-border)',
-                          color: 'var(--semantic-success)',
-                          fontSize: '0.71rem',
-                          fontWeight: 500,
-                          whiteSpace: 'nowrap'
-                        }}>
-                          {skill}
-                        </span>
-                      ))}
-                      {project.matchedSkills.length > 4 && (
-                        <span style={{
-                          padding: '2px 7px',
-                          borderRadius: 'var(--radius-md)',
-                          background: 'var(--bg-surface-hover)',
-                          border: '1px solid var(--border-subtle)',
-                          color: 'var(--text-dim)',
-                          fontSize: '0.71rem',
-                          fontWeight: 500
-                        }}>
-                          +{project.matchedSkills.length - 4} more
-                        </span>
-                      )}
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', alignItems: 'center' }}>
+                        {!expandedCards[project.id] ? (
+                          <>
+                            {project.skillsRequired.slice(0, 4).map((skill: string) => (
+                              <span key={skill} style={{
+                                padding: '2px 7px',
+                                borderRadius: 'var(--radius-md)',
+                                background: 'var(--bg-surface-hover)',
+                                border: '1px solid var(--border-subtle)',
+                                color: 'var(--text-dim)',
+                                fontSize: '0.71rem',
+                                fontWeight: 500,
+                                whiteSpace: 'nowrap'
+                              }}>
+                                {skill}
+                              </span>
+                            ))}
+                            {project.skillsRequired.length > 4 && (
+                              <span
+                                className="cursor-pointer hover:bg-gray-600"
+                                style={{
+                                  padding: '2px 7px',
+                                  borderRadius: 'var(--radius-md)',
+                                  background: 'var(--bg-surface-hover)',
+                                  border: '1px solid var(--border-subtle)',
+                                  color: 'var(--text-dim)',
+                                  fontSize: '0.71rem',
+                                  fontWeight: 500,
+                                  cursor: 'pointer'
+                                }}
+                                onClick={() => toggleSkills(project.id)}
+                              >
+                                +{project.skillsRequired.length - 4} more
+                              </span>
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            {project.skillsRequired.map((skill: string) => (
+                              <span key={skill} style={{
+                                padding: '2px 7px',
+                                borderRadius: 'var(--radius-md)',
+                                background: 'var(--bg-surface-hover)',
+                                border: '1px solid var(--border-subtle)',
+                                color: 'var(--text-dim)',
+                                fontSize: '0.71rem',
+                                fontWeight: 500,
+                                whiteSpace: 'nowrap'
+                              }}>
+                                {skill}
+                              </span>
+                            ))}
 
-                      {project.missingSkills.slice(0, 4).map((skill: string) => (
-                        <span key={skill} style={{
-                          padding: '2px 7px',
-                          borderRadius: 'var(--radius-md)',
-                          background: 'var(--bg-surface-hover)',
-                          border: '1px solid var(--border-subtle)',
-                          color: 'var(--text-dim)',
-                          fontSize: '0.71rem',
-                          fontWeight: 500,
-                          whiteSpace: 'nowrap'
-                        }}>
-                          {skill}
-                        </span>
-                      ))}
-                      {project.missingSkills.length > 4 && (
-                        <span style={{
-                          padding: '2px 7px',
-                          borderRadius: 'var(--radius-md)',
-                          background: 'var(--bg-surface-hover)',
-                          border: '1px solid var(--border-subtle)',
-                          color: 'var(--text-dim)',
-                          fontSize: '0.71rem',
-                          fontWeight: 500
-                        }}>
-                          +{project.missingSkills.length - 4} more
-                        </span>
-                      )}
+                            <span
+                              className="cursor-pointer hover:bg-gray-600"
+                              style={{
+                                padding: '2px 7px',
+                                borderRadius: 'var(--radius-md)',
+                                background: 'var(--bg-surface-hover)',
+                                border: '1px solid var(--border-subtle)',
+                                color: 'var(--text-dim)',
+                                fontSize: '0.71rem',
+                                fontWeight: 500,
+                                cursor: 'pointer'
+                              }}
+                              onClick={() => toggleSkills(project.id)}
+                            >
+                              show less
+                            </span>
+                          </>
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.8rem' }}>
+                      <div style={{ fontWeight: 500, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        Your Matching Skills
+                      </div>
+
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', alignItems: 'center' }}>
+                        {!expandedCards[project.id] ? (
+                          <>
+                            {project.matchedSkills.slice(0, 4).map((skill: string) => (
+                              <span key={skill} style={{
+                                padding: '2px 7px',
+                                borderRadius: 'var(--radius-md)',
+                                background: 'var(--semantic-success-bg)',
+                                border: '1px solid var(--semantic-success-border)',
+                                color: 'var(--semantic-success)',
+                                fontSize: '0.71rem',
+                                fontWeight: 500,
+                                whiteSpace: 'nowrap'
+                              }}>
+                                {skill}
+                              </span>
+                            ))}
+                            {project.matchedSkills.length > 4 && (
+                              <span
+                                className="cursor-pointer hover:bg-gray-600"
+                                style={{
+                                  padding: '2px 7px',
+                                  borderRadius: 'var(--radius-md)',
+                                  background: 'var(--bg-surface-hover)',
+                                  border: '1px solid var(--border-subtle)',
+                                  color: 'var(--text-dim)',
+                                  fontSize: '0.71rem',
+                                  fontWeight: 500,
+                                  cursor: 'pointer'
+                                }}
+                                onClick={() => toggleSkills(project.id)}
+                              >
+                                +{project.matchedSkills.length - 4} more
+                              </span>
+                            )}
+
+                            {project.missingSkills.slice(0, 4).map((skill: string) => (
+                              <span key={skill} style={{
+                                padding: '2px 7px',
+                                borderRadius: 'var(--radius-md)',
+                                background: 'var(--bg-surface-hover)',
+                                border: '1px solid var(--border-subtle)',
+                                color: 'var(--text-dim)',
+                                fontSize: '0.71rem',
+                                fontWeight: 500,
+                                whiteSpace: 'nowrap'
+                              }}>
+                                {skill}
+                              </span>
+                            ))}
+                            {project.missingSkills.length > 4 && (
+                              <span
+                                className="cursor-pointer hover:bg-gray-600"
+                                style={{
+                                  padding: '2px 7px',
+                                  borderRadius: 'var(--radius-md)',
+                                  background: 'var(--bg-surface-hover)',
+                                  border: '1px solid var(--border-subtle)',
+                                  color: 'var(--text-dim)',
+                                  fontSize: '0.71rem',
+                                  fontWeight: 500,
+                                  cursor: 'pointer'
+                                }}
+                                onClick={() => toggleSkills(project.id)}
+                              >
+                                +{project.missingSkills.length - 4} more
+                              </span>
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            {project.matchedSkills.map((skill: string) => (
+                              <span key={skill} style={{
+                                padding: '2px 7px',
+                                borderRadius: 'var(--radius-md)',
+                                background: 'var(--semantic-success-bg)',
+                                border: '1px solid var(--semantic-success-border)',
+                                color: 'var(--semantic-success)',
+                                fontSize: '0.71rem',
+                                fontWeight: 500,
+                                whiteSpace: 'nowrap'
+                              }}>
+                                {skill}
+                              </span>
+                            ))}
+
+                            {project.missingSkills.map((skill: string) => (
+                              <span key={skill} style={{
+                                padding: '2px 7px',
+                                borderRadius: 'var(--radius-md)',
+                                background: 'var(--bg-surface-hover)',
+                                border: '1px solid var(--border-subtle)',
+                                color: 'var(--text-dim)',
+                                fontSize: '0.71rem',
+                                fontWeight: 500,
+                                whiteSpace: 'nowrap'
+                              }}>
+                                {skill}
+                              </span>
+                            ))}
+
+                            <span
+                              className="cursor-pointer hover:bg-gray-600"
+                              style={{
+                                padding: '2px 7px',
+                                borderRadius: 'var(--radius-md)',
+                                background: 'var(--bg-surface-hover)',
+                                border: '1px solid var(--border-subtle)',
+                                color: 'var(--text-dim)',
+                                fontSize: '0.71rem',
+                                fontWeight: 500,
+                                cursor: 'pointer'
+                              }}
+                              onClick={() => toggleSkills(project.id)}
+                            >
+                              show less
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Card Footer */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border-color)', paddingTop: '16px', marginTop: 'auto' }}>
@@ -373,9 +532,13 @@ export default function SkillMatchPage() {
 
                     {/* Stats & Link button */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
-                        <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}><Users size={11} /> {project.teamSize}</span>
-                        <span style={{ display: 'flex', alignItems: 'center', gap: '3px', marginTop: '2px' }}><Clock size={11} /> {project.commitment}</span>
+                      <div className="flex items-center gap-3 text-gray-400 text-sm">
+                        <span className="flex items-center gap-1">
+                          <UsersIcon className="w-4 h-4" /> {project.team_size}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <ClockIcon className="w-4 h-4" /> {project.commitment}
+                        </span>
                       </div>
 
                       <Link href={`/projects/${project.id}`}>

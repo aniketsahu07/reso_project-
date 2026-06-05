@@ -5,6 +5,11 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '../../lib/supabase';
 import { PREDEFINED_SKILLS } from '../../lib/skills';
 
+const countWords = (text: string) => {
+  const trimmed = text.trim();
+  return trimmed === '' ? 0 : trimmed.split(/\s+/).length;
+};
+
 export default function Onboarding() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
@@ -111,7 +116,27 @@ export default function Onboarding() {
 
           <div>
             <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>Short Bio</label>
-            <textarea required maxLength={150} className="search-input" style={{ minHeight: '80px', resize: 'vertical' }} value={bio} onChange={e => setBio(e.target.value)} />
+            <textarea 
+              required 
+              className="search-input" 
+              style={{ 
+                minHeight: '80px', 
+                resize: 'vertical',
+                borderColor: countWords(bio) > 100 ? 'var(--semantic-error)' : undefined
+              }} 
+              value={bio} 
+              onChange={e => setBio(e.target.value)} 
+            />
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px', fontSize: '0.85rem' }}>
+              <span style={{ color: countWords(bio) > 100 ? 'var(--semantic-error)' : 'var(--text-secondary)' }}>
+                {countWords(bio)} / 100 words
+              </span>
+              {countWords(bio) > 100 && (
+                <span style={{ color: 'var(--semantic-error)', fontWeight: 500 }}>
+                  Bio cannot exceed 100 words.
+                </span>
+              )}
+            </div>
           </div>
 
           <div style={{ display: 'flex', gap: '16px' }}>
@@ -159,7 +184,18 @@ export default function Onboarding() {
             </div>
           </div>
 
-          <button type="submit" disabled={saving} className="btn-primary" style={{ padding: '16px', fontSize: '1.1rem', marginTop: '16px' }}>
+           <button 
+            type="submit" 
+            disabled={saving || countWords(bio) > 100} 
+            className="btn-primary" 
+            style={{ 
+              padding: '16px', 
+              fontSize: '1.1rem', 
+              marginTop: '16px',
+              opacity: (saving || countWords(bio) > 100) ? 0.6 : 1,
+              cursor: (saving || countWords(bio) > 100) ? 'not-allowed' : 'pointer'
+            }}
+          >
             {saving ? 'Saving...' : 'Enter ProjectHub'}
           </button>
         </form>

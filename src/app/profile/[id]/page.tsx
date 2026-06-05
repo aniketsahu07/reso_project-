@@ -11,6 +11,30 @@ const truncateText = (text: string, limit: number) => {
   return text.length > limit ? `${text.slice(0, limit).trimEnd()}...` : text;
 };
 
+const renderBio = (bioText: string) => {
+  if (!bioText || bioText.trim() === "" || bioText.trim() === "/") {
+    return <span style={{ color: 'var(--text-dim)', fontStyle: 'italic' }}>No bio added yet.</span>;
+  }
+  
+  const words = bioText.trim().split(/\s+/);
+  if (words.length <= 100) {
+    return bioText;
+  }
+  
+  const truncatedText = words.slice(0, 100).join(" ");
+  return (
+    <>
+      {truncatedText}
+      <span className="tooltip-container" style={{ textDecoration: 'underline dotted', color: 'var(--semantic-primary)', marginLeft: '4px', cursor: 'pointer' }}>
+        ...
+        <span className="tooltip-text">
+          This bio has been trimmed to 100 words.
+        </span>
+      </span>
+    </>
+  );
+};
+
 export default function PublicProfile({ params }: { params: { id: string } }) {
   const { id } = params;
   const [profile, setProfile] = useState<any>(null);
@@ -91,7 +115,7 @@ export default function PublicProfile({ params }: { params: { id: string } }) {
           padding: 24px;
           box-shadow: none;
           position: relative;
-          overflow: hidden;
+          overflow: visible;
         }
         .bento-header { grid-column: span 10; }
         .bento-main { grid-column: span 6; display: flex; flex-direction: column; gap: 12px; }
@@ -124,6 +148,46 @@ export default function PublicProfile({ params }: { params: { id: string } }) {
         }
         @media (max-width: 600px) {
           .bento-item { padding: 20px; }
+        }
+        
+        .tooltip-container {
+          position: relative;
+          display: inline-block;
+        }
+        .tooltip-text {
+          visibility: hidden;
+          width: 200px;
+          background-color: var(--bg-card);
+          color: var(--text-primary);
+          text-align: center;
+          border: 1px solid var(--border-subtle);
+          border-radius: var(--radius-sm);
+          padding: 8px 12px;
+          position: absolute;
+          z-index: 1000;
+          bottom: 125%;
+          left: 50%;
+          transform: translateX(-50%);
+          opacity: 0;
+          transition: opacity 0.2s, visibility 0.2s;
+          font-size: 0.8rem;
+          font-weight: 500;
+          box-shadow: var(--shadow-bento);
+          pointer-events: none;
+        }
+        .tooltip-text::after {
+          content: "";
+          position: absolute;
+          top: 100%;
+          left: 50%;
+          margin-left: -5px;
+          border-width: 5px;
+          border-style: solid;
+          border-color: var(--border-subtle) transparent transparent transparent;
+        }
+        .tooltip-container:hover .tooltip-text {
+          visibility: visible;
+          opacity: 1;
         }
       `}</style>
 
@@ -162,11 +226,7 @@ export default function PublicProfile({ params }: { params: { id: string } }) {
               About
             </h2>
             <p className="body-text" style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.92rem', lineHeight: 1.5 }}>
-              {!profile.bio || profile.bio.trim() === "" || profile.bio.trim() === "/" ? (
-                <span style={{ color: 'var(--text-dim)', fontStyle: 'italic' }}>No bio added yet.</span>
-              ) : (
-                profile.bio
-              )}
+              {renderBio(profile.bio)}
             </p>
           </div>
 

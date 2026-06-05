@@ -237,10 +237,9 @@ export default function ChatHub() {
   }
 
   const sortedProjects = [...activeProjects].sort((left, right) => (right.unreadCount > 0 ? 1 : 0) - (left.unreadCount > 0 ? 1 : 0));
-  const columnHeight = 'calc(100vh - 180px)';
 
   return (
-    <main className="main-content" style={{ maxWidth: 'min(1400px, 90vw)', paddingTop: '88px', paddingBottom: '24px', height: 'calc(100vh - 64px)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+    <main className="main-content" style={{ maxWidth: 'min(1400px, 90vw)', width: '100%', paddingLeft: '32px', paddingRight: '32px', paddingTop: '88px', paddingBottom: '24px', height: 'calc(100vh - 88px)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
       <div style={{ marginBottom: '12px' }}>
         <h1 className="h1-page" style={{ marginBottom: '2px', fontSize: '1.5rem', fontWeight: 600 }}>Team Chats</h1>
         <p className="body-text" style={{ color: 'var(--text-secondary)', fontSize: '0.88rem' }}>Collaborate with your student teams in real-time.</p>
@@ -258,7 +257,7 @@ export default function ChatHub() {
         <div className="chat-container-grid">
 
           {/* Team Members Status Sidebar */}
-          <div className="panel" style={{ height: columnHeight, padding: '12px', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+          <div className="panel" style={{ height: '100%', padding: '12px', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
             <h3 className="label-text" style={{ fontSize: '0.72rem', color: 'var(--text-dim)', borderBottom: '1px solid var(--border-color)', paddingBottom: '6px', marginBottom: '12px' }}>
               Team Status
             </h3>
@@ -290,7 +289,7 @@ export default function ChatHub() {
             </div>
 
             {/* Chat directory list */}
-            <div style={{ height: columnHeight, display: 'flex', flexDirection: 'column', gap: '10px', overflowY: 'auto' }}>
+            <div style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: '10px', overflowY: 'auto' }}>
               {sortedProjects.map(project => {
                 const isSelected = selectedProjectId === project.id;
                 return (
@@ -349,7 +348,7 @@ export default function ChatHub() {
             </div>
 
           {/* Selected Chat Preview Pane */}
-          <div className="panel" style={{ height: columnHeight, display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: 0 }}>
+          <div className="panel" style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: 0 }}>
             {previewLoading ? (
               <div style={{ margin: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
                 <div style={{ width: '32px', height: '32px', borderRadius: '50%', border: '2px solid var(--border-subtle)', borderTopColor: 'var(--semantic-primary)', animation: 'spin 0.8s linear infinite' }} />
@@ -369,7 +368,7 @@ export default function ChatHub() {
                   </Link>
                 </div>
 
-                <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ flex: 1, overflowY: 'auto', height: 0, padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   {previewMessages.length === 0 ? (
                     <div style={{ textAlign: 'center', color: 'var(--text-secondary)', margin: 'auto', fontSize: '0.85rem' }}>
                       No messages in this chat yet. Open the workspace to say hello!
@@ -397,7 +396,7 @@ export default function ChatHub() {
                 </div>
 
                 {/* Disabled Input Bar at bottom of preview pane */}
-                <div style={{ padding: '12px 16px', background: 'var(--bg-interactive-neutral)', borderTop: '1px solid var(--border-color)' }}>
+                <div style={{ padding: '12px 16px', background: 'var(--bg-interactive-neutral)', borderTop: '1px solid var(--border-color)', flexShrink: 0 }}>
                   <div style={{ display: 'flex', gap: '12px' }}>
                     <input
                       type="text"

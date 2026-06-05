@@ -175,6 +175,7 @@
 }
 
 html {
+  font-size: 18px;
   scroll-behavior: smooth;
 }
 
@@ -1411,11 +1412,12 @@ h6 {
 
 .chat-container-grid {
   display: grid;
-  grid-template-columns: 15fr 25fr 60fr;
+  grid-template-columns: 12fr 23fr 65fr;
   gap: 16px;
   flex: 1;
   overflow: hidden;
   min-height: 0;
+  height: 100%;
 }
 @media (max-width: 900px) {
   .chat-container-grid {
@@ -1439,4 +1441,54 @@ h6 {
   .skills-input-grid {
     grid-template-columns: repeat(5, minmax(0, 1fr));
   }
+}
+
+/* Tailwind compatibility utility classes */
+.border {
+  border-width: 1px;
+  border-style: solid;
+}
+.border-gray-700 {
+  border-color: #374151;
+}
+.border-t {
+  border-top-width: 1px;
+  border-top-style: solid;
+}
+.my-3 {
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+.cursor-pointer {
+  cursor: pointer;
+}
+.hover\:bg-gray-600:hover {
+  background-color: #4b5563 !important;
+}
+.hover\:bg-purple-600:hover {
+  background-color: #7c3aed !important;
+}
+.flex {
+  display: flex;
+}
+.items-center {
+  align-items: center;
+}
+.gap-3 {
+  gap: 12px;
+}
+.gap-1 {
+  gap: 4px;
+}
+.text-gray-400 {
+  color: #9ca3af;
+}
+.text-sm {
+  font-size: 0.875rem;
+}
+.w-4 {
+  width: 16px;
+}
+.h-4 {
+  height: 16px;
 }

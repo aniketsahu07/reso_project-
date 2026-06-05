@@ -7,6 +7,30 @@ import { CheckCircle, ExternalLink, Code, Crown, Briefcase, Calendar, Edit3 } fr
 import Link from 'next/link';
 import { useAuth } from '../../components/AuthProvider';
 
+const renderBio = (bioText: string) => {
+  if (!bioText || bioText.trim() === "" || bioText.trim() === "/") {
+    return <span style={{ color: 'var(--text-dim)', fontStyle: 'italic' }}>No bio added yet.</span>;
+  }
+  
+  const words = bioText.trim().split(/\s+/);
+  if (words.length <= 100) {
+    return bioText;
+  }
+  
+  const truncatedText = words.slice(0, 100).join(" ");
+  return (
+    <>
+      {truncatedText}
+      <span className="tooltip-container" style={{ textDecoration: 'underline dotted', color: 'var(--semantic-primary)', marginLeft: '4px', cursor: 'pointer' }}>
+        ...
+        <span className="tooltip-text">
+          This bio has been trimmed to 100 words.
+        </span>
+      </span>
+    </>
+  );
+};
+
 export default function Profile() {
   const [profile, setProfile] = useState<any>(null);
   const [portfolio, setPortfolio] = useState<any[]>([]);
@@ -154,12 +178,52 @@ export default function Profile() {
         @media (max-width: 900px) {
           .bento-main, .bento-sidebar { grid-column: span 10; position: static; top: auto; }
         }
-        @media (max-width: 700px) {
+         @media (max-width: 700px) {
           .bento-header { flex-wrap: wrap; padding: 20px !important; }
           .profile-meta-row { flex-wrap: wrap; }
           .profile-edit-btn { margin-left: 0 !important; }
           .social-buttons { justify-content: center; }
           .bento-item { padding: 20px; }
+        }
+        
+        .tooltip-container {
+          position: relative;
+          display: inline-block;
+        }
+        .tooltip-text {
+          visibility: hidden;
+          width: 200px;
+          background-color: var(--bg-card);
+          color: var(--text-primary);
+          text-align: center;
+          border: 1px solid var(--border-subtle);
+          border-radius: var(--radius-sm);
+          padding: 8px 12px;
+          position: absolute;
+          z-index: 1000;
+          bottom: 125%;
+          left: 50%;
+          transform: translateX(-50%);
+          opacity: 0;
+          transition: opacity 0.2s, visibility 0.2s;
+          font-size: 0.8rem;
+          font-weight: 500;
+          box-shadow: var(--shadow-bento);
+          pointer-events: none;
+        }
+        .tooltip-text::after {
+          content: "";
+          position: absolute;
+          top: 100%;
+          left: 50%;
+          margin-left: -5px;
+          border-width: 5px;
+          border-style: solid;
+          border-color: var(--border-subtle) transparent transparent transparent;
+        }
+        .tooltip-container:hover .tooltip-text {
+          visibility: visible;
+          opacity: 1;
         }
       `}</style>
 
@@ -277,11 +341,7 @@ export default function Profile() {
           <div style={{ borderBottom: '1px solid var(--border-subtle)', paddingBottom: '12px', marginBottom: '0px' }}>
             <span className="section-label">About</span>
             <p className="body-text" style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.92rem', lineHeight: 1.5 }}>
-              {!profile?.bio || profile.bio.trim() === "" || profile.bio.trim() === "/" ? (
-                <span style={{ color: 'var(--text-dim)', fontStyle: 'italic' }}>No bio added yet.</span>
-              ) : (
-                profile.bio
-              )}
+              {renderBio(profile?.bio)}
             </p>
           </div>
 

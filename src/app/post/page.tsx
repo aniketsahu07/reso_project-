@@ -18,6 +18,7 @@ export default function PostProject() {
     teamSize: '',
     stage: 'Idea Stage'
   });
+  const [touched, setTouched] = useState({ title: false, description: false });
 
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
@@ -91,6 +92,29 @@ export default function PostProject() {
 
   return (
     <main className="main-content" style={{ maxWidth: '1000px', paddingTop: '88px' }}>
+      <style>{`
+        .field-error {
+          color: var(--semantic-error);
+          font-size: 0.85rem;
+          margin-top: 6px;
+          margin-bottom: 0;
+          font-weight: 500;
+        }
+        .field-warn {
+          color: var(--semantic-warning);
+          font-size: 0.85rem;
+          margin-top: 6px;
+          margin-bottom: 0;
+          font-weight: 500;
+        }
+        .field-success {
+          color: var(--semantic-success);
+          font-size: 0.85rem;
+          margin-top: 6px;
+          margin-bottom: 0;
+          font-weight: 500;
+        }
+      `}</style>
       
       <form onSubmit={handleSubmit} className="panel" style={{ padding: '32px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
         <div style={{ marginBottom: '8px' }}>
@@ -103,10 +127,17 @@ export default function PostProject() {
             type="text" 
             required 
             className="search-input" 
-            style={{ padding: '12px 16px' }}
+            style={{ 
+              padding: '12px 16px',
+              borderColor: touched.title && formData.title.trim().length < 3 ? 'var(--semantic-error)' : undefined
+            }}
             value={formData.title}
             onChange={(e) => setFormData({...formData, title: e.target.value})}
+            onBlur={() => setTouched(prev => ({ ...prev, title: true }))}
           />
+          {touched.title && formData.title.trim().length < 3 && (
+            <p className="field-error">⚠️ Title is too short. Use a meaningful name.</p>
+          )}
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
@@ -159,10 +190,24 @@ export default function PostProject() {
             required 
             rows={4}
             className="search-input" 
-            style={{ padding: '12px 16px', resize: 'vertical' }}
+            style={{ 
+              padding: '12px 16px', 
+              resize: 'vertical',
+              borderColor: touched.description && formData.description.trim().length === 0 ? 'var(--semantic-error)' : (touched.description && formData.description.trim().length < 20 && formData.description.trim().length > 0 ? 'var(--semantic-warning)' : undefined)
+            }}
             value={formData.description}
             onChange={(e) => setFormData({...formData, description: e.target.value})}
+            onBlur={() => setTouched(prev => ({ ...prev, description: true }))}
           />
+          {touched.description && formData.description.trim().length === 0 && (
+            <p className="field-error">Please add a description.</p>
+          )}
+          {formData.description.trim().length > 0 && formData.description.trim().length < 20 && (
+            <p className="field-warn">⚠️ Your description is very short. A detailed overview helps attract better teammates.</p>
+          )}
+          {touched.description && formData.description.trim().length >= 20 && (
+            <p className="field-success">✓ Looks good</p>
+          )}
         </div>
 
         <div>
@@ -240,7 +285,18 @@ export default function PostProject() {
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px' }}>
-          <button type="submit" disabled={loading} className="btn-primary" style={{ padding: '10px 24px', fontSize: '0.95rem', width: 'auto' }}>
+          <button 
+            type="submit" 
+            disabled={loading || formData.title.trim().length < 3 || formData.description.trim().length === 0} 
+            className="btn-primary" 
+            style={{ 
+              padding: '10px 24px', 
+              fontSize: '0.95rem', 
+              width: 'auto',
+              opacity: (loading || formData.title.trim().length < 3 || formData.description.trim().length === 0) ? 0.6 : 1,
+              cursor: (loading || formData.title.trim().length < 3 || formData.description.trim().length === 0) ? 'not-allowed' : 'pointer'
+            }}
+          >
             {loading ? 'Posting...' : 'Post Project'}
           </button>
         </div>
