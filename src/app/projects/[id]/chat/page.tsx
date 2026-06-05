@@ -9,12 +9,14 @@ import BackButton from '../../../../components/BackButton';
 export default function TeamChat({ params }: { params: { id: string } }) {
   const router = useRouter();
   const { id } = params;
-  
+
   const [messages, setMessages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [newMessage, setNewMessage] = useState("");
   const [sending, setSending] = useState(false);
+  const [project, setProject] = useState<any>(null);
+  const [teamMembers, setTeamMembers] = useState<any[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -26,19 +28,23 @@ export default function TeamChat({ params }: { params: { id: string } }) {
       }
       setUser(session.user);
 
-      const { data: project } = await supabase
+      const { data: projectData } = await supabase
         .from('projects')
-        .select('founder_id, title')
+        .select(`
+          founder_id, title,
+          users!projects_founder_id_fkey ( full_name, avatar_url )
+        `)
         .eq('id', id)
         .single();
-        
-      if (!project) {
+
+      if (!projectData) {
         router.push('/');
         return;
       }
+      setProject(projectData);
 
-      let hasAccess = project.founder_id === session.user.id;
-      
+      let hasAccess = projectData.founder_id === session.user.id;
+
       if (!hasAccess) {
         const { data: app } = await supabase
           .from('applications')
@@ -46,7 +52,7 @@ export default function TeamChat({ params }: { params: { id: string } }) {
           .eq('project_id', id)
           .eq('applicant_id', session.user.id)
           .single();
-          
+
         if (app?.status === 'Accepted') {
           hasAccess = true;
         }
@@ -55,6 +61,17 @@ export default function TeamChat({ params }: { params: { id: string } }) {
       if (!hasAccess) {
         router.push(`/projects/${id}`);
         return;
+      }
+
+      // Fetch team members
+      const { data: membersData } = await supabase
+        .from('applications')
+        .select(`applicant_id, users!applications_applicant_id_fkey ( full_name, avatar_url, university )`)
+        .eq('project_id', id)
+        .eq('status', 'Accepted');
+
+      if (membersData) {
+        setTeamMembers(membersData);
       }
 
       const { data: msgs } = await supabase
@@ -74,10 +91,10 @@ export default function TeamChat({ params }: { params: { id: string } }) {
           last_read_at: new Date().toISOString()
         });
       }
-      
+
       setLoading(false);
     }
-    
+
     loadData();
   }, [id, router]);
 
@@ -123,7 +140,7 @@ export default function TeamChat({ params }: { params: { id: string } }) {
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMessage.trim() || !user) return;
-    
+
     setSending(true);
     const msg = newMessage;
     setNewMessage("");
@@ -135,7 +152,7 @@ export default function TeamChat({ params }: { params: { id: string } }) {
         user_id: user.id,
         content: msg.trim()
       });
-      
+
     if (error) {
       setNewMessage(msg);
       alert("Failed to send message: " + error.message);
@@ -144,79 +161,128 @@ export default function TeamChat({ params }: { params: { id: string } }) {
   };
 
   if (loading) {
-    return <div style={{ textAlign: 'center', padding: '100px', color: 'var(--text-secondary)' }}>Connecting to secure chat workspace...</div>;
+    return <div className="body-text" style={{ textAlign: 'center', padding: '100px', color: 'var(--text-secondary)' }}>Loading team chat workspace...</div>;
   }
 
   return (
-    <main className="main-content" style={{ maxWidth: '800px', paddingTop: '100px', height: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ marginBottom: '24px' }}>
+    <main className="main-content" style={{ maxWidth: '1200px', paddingTop: '80px', height: 'calc(100vh - 100px)', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <div style={{ marginBottom: '16px' }}>
         <BackButton href="/chat" text="Back to Chat Directory" />
-        <h1 style={{ fontSize: '2rem' }}>Team Workspace</h1>
-        <p style={{ color: 'var(--text-secondary)' }}>Real-time team chat.</p>
+        <h1 style={{ fontSize: '1.8rem', fontWeight: 600 }}>{project?.title} Chat Workspace</h1>
+        <p className="body-text" style={{ color: 'var(--text-secondary)' }}>Real-time workspace communication channel.</p>
       </div>
-      
-      <div className="glass-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: 0, marginBottom: '40px' }}>
-        
-        <div style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {messages.length === 0 ? (
-            <div style={{ textAlign: 'center', color: 'var(--text-secondary)', margin: 'auto' }}>
-              No messages yet. Start the conversation!
-            </div>
-          ) : (
-            messages.map((msg, idx) => {
-              const isMe = msg.user_id === user.id;
-              
-              return (
-                <div key={msg.id || idx} style={{ display: 'flex', flexDirection: isMe ? 'row-reverse' : 'row', gap: '12px', alignItems: 'flex-end' }}>
-                  {!isMe && (
-                    <img 
-                      src={msg.users?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(msg.users?.full_name || 'User')}&background=6366f1&color=fff`} 
-                      alt={msg.users?.full_name} 
-                      style={{ width: '32px', height: '32px', borderRadius: '50%' }} 
-                    />
-                  )}
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: isMe ? 'flex-end' : 'flex-start', maxWidth: '70%' }}>
-                    {!isMe && <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '4px', marginLeft: '4px' }}>{msg.users?.full_name}</span>}
-                    <div style={{ 
-                      background: isMe ? 'var(--accent-primary)' : 'var(--bg-surface-hover)', 
-                      color: isMe ? '#fff' : 'var(--text-primary)',
-                      padding: '12px 16px', 
-                      borderRadius: isMe ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-                      fontSize: '0.95rem',
-                      lineHeight: 1.5
-                    }}>
-                      {msg.content}
+
+      <div style={{ display: 'flex', gap: '20px', flex: 1, overflow: 'hidden', minHeight: 0 }}>
+
+        {/* Main Chat Pane */}
+        <div className="panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: 0 }}>
+
+          <div style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {messages.length === 0 ? (
+              <div style={{ textAlign: 'center', color: 'var(--text-secondary)', margin: 'auto' }}>
+                No messages yet. Start the conversation!
+              </div>
+            ) : (
+              messages.map((msg, idx) => {
+                const isMe = msg.user_id === user.id;
+
+                return (
+                  <div key={msg.id || idx} style={{ display: 'flex', flexDirection: isMe ? 'row-reverse' : 'row', gap: '12px', alignItems: 'flex-end' }}>
+                    {!isMe && (
+                      <img
+                        src={msg.users?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(msg.users?.full_name || 'User')}&background=d0d7de&color=24292f`}
+                        alt={msg.users?.full_name}
+                        style={{ width: '32px', height: '32px', borderRadius: '50%' }}
+                      />
+                    )}
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: isMe ? 'flex-end' : 'flex-start', maxWidth: '70%' }}>
+                      {!isMe && <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '4px', marginLeft: '4px' }}>{msg.users?.full_name}</span>}
+                      <div style={{
+                        background: isMe ? 'var(--semantic-primary)' : 'var(--bg-surface-hover)',
+                        color: isMe ? 'var(--text-white)' : 'var(--text-primary)',
+                        padding: '10px 14px',
+                        borderRadius: isMe ? '12px 12px 2px 12px' : '12px 12px 12px 2px',
+                        fontSize: '0.92rem',
+                        lineHeight: 1.4
+                      }}>
+                        {msg.content}
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })
-          )}
-          <div ref={messagesEndRef} />
+                );
+              })
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+
+          <div style={{ padding: '12px 16px', background: 'var(--bg-input)', borderTop: '1px solid var(--border-color)' }}>
+            <form onSubmit={handleSendMessage} style={{ display: 'flex', gap: '12px' }}>
+              <input
+                type="text"
+                className="search-input"
+                placeholder="Type your message..."
+                style={{ flex: 1, padding: '10px 14px', borderRadius: 'var(--radius-md)' }}
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                disabled={sending}
+              />
+              <button
+                type="submit"
+                disabled={sending || !newMessage.trim()}
+                className="btn-primary"
+                style={{ borderRadius: '50%', width: '40px', height: '40px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                <Send size={16} />
+              </button>
+            </form>
+          </div>
         </div>
 
-        <div style={{ padding: '16px', background: 'rgba(255, 255, 255, 0.02)', borderTop: '1px solid var(--border-color)' }}>
-          <form onSubmit={handleSendMessage} style={{ display: 'flex', gap: '12px' }}>
-            <input 
-              type="text" 
-              className="search-input" 
-              placeholder="Type your message..." 
-              style={{ flex: 1, padding: '14px 16px', borderRadius: '24px' }}
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              disabled={sending}
-            />
-            <button 
-              type="submit" 
-              disabled={sending || !newMessage.trim()} 
-              className="btn-primary" 
-              style={{ borderRadius: '50%', width: '48px', height: '48px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-            >
-              <Send size={20} />
-            </button>
-          </form>
+        {/* Right Team Roster Sidebar */}
+        <div className="panel" style={{ width: '240px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px', alignSelf: 'stretch', overflowY: 'auto' }}>
+          <div>
+            <h3 className="label-text" style={{ fontSize: '0.72rem', color: 'var(--text-dim)', borderBottom: '1px solid var(--border-color)', paddingBottom: '6px', marginBottom: '12px' }}>Team Roster</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+
+              {/* Founder */}
+              {project && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <img
+                    src={project.users?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(project.users?.full_name || 'Founder')}&background=d0d7de&color=24292f`}
+                    alt={project.users?.full_name}
+                    style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover' }}
+                  />
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                      {project.users?.full_name}
+                    </div>
+                    <div style={{ fontSize: '0.68rem', color: 'var(--semantic-primary)' }}>Founder</div>
+                  </div>
+                  <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--semantic-success)' }}></div>
+                </div>
+              )}
+
+              {/* Members */}
+              {teamMembers.map((member, index) => (
+                <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <img
+                    src={member.users?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.users?.full_name || 'Member')}&background=d0d7de&color=24292f`}
+                    alt={member.users?.full_name}
+                    style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover' }}
+                  />
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <div style={{ fontSize: '0.82rem', fontWeight: 500, color: 'var(--text-primary)', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                      {member.users?.full_name}
+                    </div>
+                    <div style={{ fontSize: '0.68rem', color: 'var(--text-secondary)' }}>Member</div>
+                  </div>
+                  <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--semantic-success)' }}></div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-        
+
       </div>
     </main>
   );

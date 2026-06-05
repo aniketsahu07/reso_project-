@@ -10,6 +10,13 @@ const clampScore = (value: number) => Math.max(0, Math.min(1, value));
 const clampPercent = (value: number) => Math.max(0, Math.min(100, value));
 const MAX_CANDIDATES = 25;
 
+export async function GET() {
+  return NextResponse.json(
+    { error: 'Method Not Allowed. Please make a POST request with the required payload.' },
+    { status: 405 }
+  );
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => ({}));

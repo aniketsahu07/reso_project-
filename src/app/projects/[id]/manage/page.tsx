@@ -3,14 +3,14 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../../../lib/supabase';
 import { useRouter } from 'next/navigation';
-import { Check, X, Clock, Plus, GitBranch, Trash2, AlertTriangle, Sparkles } from 'lucide-react';
+import { Check, X, Clock, Plus, GitBranch, Trash2, AlertTriangle } from 'lucide-react';
 import BackButton from '../../../../components/BackButton';
 import Link from 'next/link';
 
 export default function ManageProject({ params }: { params: { id: string } }) {
   const router = useRouter();
   const { id } = params;
-  
+
   const [project, setProject] = useState<any>(null);
   const [applications, setApplications] = useState<any[]>([]);
   const [milestones, setMilestones] = useState<any[]>([]);
@@ -127,12 +127,12 @@ export default function ManageProject({ params }: { params: { id: string } }) {
         .select('*')
         .eq('id', id)
         .single();
-        
+
       if (!projectData || projectData.founder_id !== session.user.id) {
         router.push('/dashboard');
         return;
       }
-      
+
       setProject(projectData);
       setGithubUrl(projectData.github_url || "");
 
@@ -147,7 +147,7 @@ export default function ManageProject({ params }: { params: { id: string } }) {
 
       if (appsData) {
         setApplications(appsData);
-        
+
         // Auto-clear notification badge by marking pending applications as read
         const hasUnread = appsData.some(app => app.status === 'Pending');
         if (hasUnread) {
@@ -168,22 +168,22 @@ export default function ManageProject({ params }: { params: { id: string } }) {
       if (milestonesData) {
         setMilestones(milestonesData);
       }
-      
+
       setLoading(false);
     }
-    
+
     loadData();
   }, [id, router]);
 
   const updateStatus = async (appId: string, newStatus: string, feedback: string | null = null) => {
     const payload: any = { status: newStatus };
     if (feedback !== null) payload.feedback = feedback;
-    
+
     const { error } = await supabase
       .from('applications')
       .update(payload)
       .eq('id', appId);
-      
+
     if (!error) {
       setApplications(applications.map(app => app.id === appId ? { ...app, status: newStatus, feedback } : app));
       if (newStatus === 'Declined') {
@@ -208,7 +208,7 @@ export default function ManageProject({ params }: { params: { id: string } }) {
       .insert({ project_id: id, title: milestoneTitle, description: payload })
       .select()
       .single();
-    
+
     if (data) {
       setMilestones([data, ...milestones]);
       setMilestoneTitle("");
@@ -226,7 +226,7 @@ export default function ManageProject({ params }: { params: { id: string } }) {
     try {
       const parsed = JSON.parse(currentDesc);
       if (parsed.desc !== undefined) details = { ...details, ...parsed };
-    } catch (e) {}
+    } catch (e) { }
 
     const newPayload = JSON.stringify({ ...details, completed: true, completed_at: new Date().toISOString() });
 
@@ -246,7 +246,7 @@ export default function ManageProject({ params }: { params: { id: string } }) {
       .from('projects')
       .update({ github_url: githubUrl.trim() === "" ? null : githubUrl.trim() })
       .eq('id', id);
-      
+
     if (!error) {
       setProject({ ...project, github_url: githubUrl.trim() });
     }
@@ -260,7 +260,7 @@ export default function ManageProject({ params }: { params: { id: string } }) {
         .from('projects')
         .delete()
         .eq('id', id);
-        
+
       if (!error) {
         router.push('/dashboard');
       } else {
@@ -278,7 +278,7 @@ export default function ManageProject({ params }: { params: { id: string } }) {
         }}>
           <div style={{
             width: '48px', height: '48px', borderRadius: '50%',
-            border: '3px solid var(--border-subtle)', borderTopColor: 'var(--accent-indigo)',
+            border: '3px solid var(--border-subtle)', borderTopColor: 'var(--semantic-primary)',
             animation: 'spin 0.8s linear infinite'
           }} />
           <span style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', fontWeight: 500 }}>
@@ -293,38 +293,38 @@ export default function ManageProject({ params }: { params: { id: string } }) {
   return (
     <main className="main-content" style={{ maxWidth: '1000px' }}>
       <BackButton href="/dashboard" text="Back to Dashboard" />
-      
+
       <div style={{ marginBottom: '32px' }}>
         <h1 className="section-title" style={{ fontSize: '2.5rem', marginBottom: '8px' }}>{project.title}</h1>
         <p style={{ color: 'var(--text-secondary)', fontSize: '1.05rem' }}>Manage your team and track your progress.</p>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '32px' }}>
-        
+
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           {applications.filter(a => a.status === 'Accepted').length > 0 && (
             <div>
-              <h2 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--accent-emerald)', marginBottom: '16px' }}>Active Roster</h2>
+              <h2 style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--semantic-success)', marginBottom: '16px' }}>Active Roster</h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {applications.filter(a => a.status === 'Accepted').map(app => {
                   const applicant = Array.isArray(app.users) ? app.users[0] : app.users;
                   return (
-                    <div key={app.id} className="glass-card" style={{ padding: '16px', borderLeft: '3px solid #10b981' }}>
+                    <div key={app.id} className="card" style={{ padding: '16px', borderLeft: '3px solid var(--semantic-success)' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
                         <Link href={`/profile/${app.applicant_id}`} style={{ textDecoration: 'none' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
-                            <img 
-                              src={applicant?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(applicant?.full_name || 'Anonymous')}&background=6366f1&color=fff`} 
+                            <img
+                              src={applicant?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(applicant?.full_name || 'Anonymous')}&background=d0d7de&color=24292f`}
                               alt={applicant?.full_name || 'Anonymous'}
-                              style={{ width: '44px', height: '44px', borderRadius: '14px', border: '2px solid rgba(99,102,241,0.25)', objectFit: 'cover' }}
+                              style={{ width: '44px', height: '44px', borderRadius: '50%', border: '2px solid var(--semantic-primary-border)', objectFit: 'cover' }}
                             />
                             <div>
-                              <h3 style={{ fontSize: '1.05rem', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>{applicant?.full_name || 'Anonymous'}</h3>
+                              <h3 style={{ fontSize: '1.05rem', fontWeight: 500, color: 'var(--text-primary)', margin: 0 }}>{applicant?.full_name || 'Anonymous'}</h3>
                               <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '2px' }}>{applicant?.university || 'University not specified'}</div>
                             </div>
                           </div>
                         </Link>
-                        <button onClick={() => updateStatus(app.id, 'Removed')} className="btn-ghost" style={{ padding: '8px 16px', color: '#F87171', border: '1px solid rgba(248, 113, 113, 0.3)', fontSize: '0.85rem' }}>
+                        <button onClick={() => updateStatus(app.id, 'Removed')} className="btn-ghost" style={{ padding: '8px 16px', color: 'var(--semantic-error)', border: '1px solid var(--semantic-error-border)', fontSize: '0.85rem' }}>
                           Remove
                         </button>
                       </div>
@@ -336,9 +336,9 @@ export default function ManageProject({ params }: { params: { id: string } }) {
           )}
 
           <div>
-            <h2 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '16px' }}>Pending Requests</h2>
+            <h2 style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '16px' }}>Pending Requests</h2>
             {applications.filter(a => a.status === 'Pending').length === 0 ? (
-              <div className="glass-card" style={{ padding: '32px', textAlign: 'center' }}>
+              <div className="card" style={{ padding: '32px', textAlign: 'center' }}>
                 <p style={{ color: 'var(--text-secondary)' }}>No new applications.</p>
               </div>
             ) : (
@@ -346,102 +346,102 @@ export default function ManageProject({ params }: { params: { id: string } }) {
                 {applications.filter(a => a.status === 'Pending').map(app => {
                   const applicant = Array.isArray(app.users) ? app.users[0] : app.users;
                   return (
-                    <div key={app.id} className="glass-card" style={{ padding: '20px' }}>
+                    <div key={app.id} className="card" style={{ padding: '20px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                           <Link href={`/profile/${app.applicant_id}`}>
-                            <img 
-                              src={applicant?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(applicant?.full_name || 'Anonymous')}&background=6366f1&color=fff`} 
+                            <img
+                              src={applicant?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(applicant?.full_name || 'Anonymous')}&background=d0d7de&color=24292f`}
                               alt={applicant?.full_name || 'Anonymous'}
-                              style={{ width: '48px', height: '48px', borderRadius: '14px', border: '2px solid rgba(99,102,241,0.25)', cursor: 'pointer', objectFit: 'cover' }}
+                              style={{ width: '48px', height: '48px', borderRadius: '50%', border: '2px solid var(--semantic-primary-border)', cursor: 'pointer', objectFit: 'cover' }}
                             />
                           </Link>
                           <div>
                             <Link href={`/profile/${app.applicant_id}`} style={{ textDecoration: 'none' }}>
-                              <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)', margin: 0, cursor: 'pointer' }}>{applicant?.full_name || 'Anonymous'}</h3>
+                              <h3 style={{ fontSize: '1.1rem', fontWeight: 500, color: 'var(--text-primary)', margin: 0, cursor: 'pointer' }}>{applicant?.full_name || 'Anonymous'}</h3>
                             </Link>
                             <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '2px' }}>{applicant?.university || 'University not specified'}</div>
                           </div>
                         </div>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', padding: '4px 10px', background: 'var(--bg-surface-hover)', borderRadius: '12px' }}>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', padding: '4px 10px', background: 'var(--bg-surface-hover)', borderRadius: '8px' }}>
                           {new Date(app.created_at).toLocaleDateString()}
                         </div>
                       </div>
 
-                    <div style={{ background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.12)', borderRadius: '12px', padding: '16px', marginBottom: '16px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: 'var(--accent-indigo)', marginBottom: '8px', fontWeight: 600 }}>
-                        <Clock size={14} /> Application Pitch
+                      <div style={{ background: 'var(--semantic-primary-bg)', border: '1px solid var(--semantic-primary-border)', borderRadius: 'var(--radius-md)', padding: '16px', marginBottom: '16px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: 'var(--semantic-primary)', marginBottom: '8px', fontWeight: 500 }}>
+                          <Clock size={14} /> Application Pitch
+                        </div>
+                        <p style={{ lineHeight: 1.6, fontSize: '0.95rem', color: 'var(--text-primary)', margin: 0 }}>"{app.pitch}"</p>
                       </div>
-                      <p style={{ lineHeight: 1.6, fontSize: '0.95rem', color: 'var(--text-primary)', margin: 0 }}>"{app.pitch}"</p>
-                    </div>
 
-                    <div style={{ marginBottom: '20px' }}>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                        {applicant?.user_skills?.map((skill: any) => (
-                          <span key={skill.skill_name} className="badge badge-success" style={{ fontSize: '0.75rem', padding: '4px 10px' }}>{skill.skill_name}</span>
-                        ))}
-                      </div>
-                    </div>
-
-                    {decliningAppId === app.id ? (
-                      <div style={{ width: '100%', padding: '16px', background: 'rgba(248,113,113,0.05)', borderRadius: '12px', border: '1px solid rgba(248,113,113,0.2)', marginTop: '12px' }}>
-                        <p style={{ fontSize: '0.85rem', color: '#F87171', marginBottom: '8px', fontWeight: 600 }}>Reason for declining (optional)</p>
-                        <textarea
-                          className="search-field"
-                          value={declineFeedback}
-                          onChange={(e) => setDeclineFeedback(e.target.value)}
-                          placeholder="e.g. Need more experience with React"
-                          style={{ width: '100%', minHeight: '60px', padding: '12px', fontSize: '0.9rem', borderRadius: '8px', background: 'var(--bg-main)' }}
-                        />
-                        <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-                          <button onClick={() => updateStatus(app.id, 'Declined', declineFeedback)} className="btn-glow" style={{ background: '#F87171', padding: '8px 16px', fontSize: '0.85rem' }}>
-                            Confirm Decline
-                          </button>
-                          <button onClick={() => setDecliningAppId(null)} className="btn-ghost" style={{ padding: '8px 16px', fontSize: '0.85rem' }}>
-                            Cancel
-                          </button>
+                      <div style={{ marginBottom: '20px' }}>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                          {applicant?.user_skills?.map((skill: any) => (
+                            <span key={skill.skill_name} className="badge badge-success" style={{ fontSize: '0.75rem', padding: '4px 10px' }}>{skill.skill_name}</span>
+                          ))}
                         </div>
                       </div>
-                    ) : (
-                      <div style={{ display: 'flex', gap: '12px', borderTop: '1px solid rgba(99,102,241,0.1)', paddingTop: '20px', flexWrap: 'wrap', width: '100%' }}>
-                        <button onClick={() => updateStatus(app.id, 'Accepted')} className="btn-glow" style={{ background: 'linear-gradient(135deg, #10b981, #059669)', flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', minWidth: '120px' }}>
-                          <Check size={16} /> Accept
-                        </button>
-                        <button onClick={() => setDecliningAppId(app.id)} className="btn-ghost" style={{ flex: 1, color: '#F87171', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', border: '1px solid rgba(248,113,113,0.3)', minWidth: '120px' }}>
-                          <X size={16} /> Decline
-                        </button>
-                      </div>
-                    )}
-                  </div>
+
+                      {decliningAppId === app.id ? (
+                        <div style={{ width: '100%', padding: '16px', background: 'var(--semantic-error-bg)', borderRadius: 'var(--radius-md)', border: '1px solid var(--semantic-error-border)', marginTop: '12px' }}>
+                          <p style={{ fontSize: '0.85rem', color: 'var(--semantic-error)', marginBottom: '8px', fontWeight: 600 }}>Reason for declining (optional)</p>
+                          <textarea
+                            className="search-field"
+                            value={declineFeedback}
+                            onChange={(e) => setDeclineFeedback(e.target.value)}
+                            placeholder="e.g. Need more experience with React"
+                            style={{ width: '100%', minHeight: '60px', padding: '12px', fontSize: '0.9rem', borderRadius: '8px', background: 'var(--bg-main)' }}
+                          />
+                          <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                            <button onClick={() => updateStatus(app.id, 'Declined', declineFeedback)} className="btn-primary" style={{ background: 'var(--semantic-error-solid)', color: 'var(--semantic-error-fg)', padding: '8px 16px', fontSize: '0.85rem', border: 'none' }}>
+                              Confirm Decline
+                            </button>
+                            <button onClick={() => setDecliningAppId(null)} className="btn-ghost" style={{ padding: '8px 16px', fontSize: '0.85rem' }}>
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div style={{ display: 'flex', gap: '12px', borderTop: '1px solid var(--semantic-primary-border)', paddingTop: '20px', flexWrap: 'wrap', width: '100%' }}>
+                          <button onClick={() => updateStatus(app.id, 'Accepted')} className="btn-primary" style={{ background: 'var(--semantic-success-solid)', color: 'var(--semantic-success-fg)', flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', minWidth: '120px', border: 'none' }}>
+                            <Check size={16} /> Accept
+                          </button>
+                          <button onClick={() => setDecliningAppId(app.id)} className="btn-ghost" style={{ flex: 1, color: 'var(--semantic-error)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', border: '1px solid var(--semantic-error-border)', minWidth: '120px' }}>
+                            <X size={16} /> Decline
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   );
                 })}
               </div>
             )}
           </div>
         </div>
-        
+
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           <div>
-            <h2 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '16px' }}>Integrations</h2>
-            <div className="glass-card" style={{ padding: '24px' }}>
+            <h2 style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '16px' }}>Integrations</h2>
+            <div className="card" style={{ padding: '24px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-                <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'linear-gradient(135deg, var(--accent-indigo), var(--accent-violet))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <GitBranch size={16} color="#fff" />
+                <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'var(--semantic-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <GitBranch size={16} color="var(--text-white)" />
                 </div>
                 <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>GitHub Repository</h3>
               </div>
               <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '16px', lineHeight: 1.5 }}>Link your repository to display a live commit feed on your project page.</p>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                <input 
-                  type="url" 
-                  placeholder="https://github.com/username/repo" 
-                  className="search-field" 
+                <input
+                  type="url"
+                  placeholder="https://github.com/username/repo"
+                  className="search-field"
                   style={{ flex: 1, minWidth: '200px' }}
                   value={githubUrl}
                   onChange={(e) => setGithubUrl(e.target.value)}
                 />
-                <button 
-                  className="btn-glow" 
+                <button
+                  className="btn-primary"
                   onClick={handleSaveGithub}
                   disabled={savingGithub || githubUrl === project.github_url}
                   style={{ padding: '10px 24px' }}
@@ -453,39 +453,39 @@ export default function ManageProject({ params }: { params: { id: string } }) {
           </div>
 
           <div>
-            <h2 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              BuildTrack & AI Architect
+            <h2 style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              BuildTrack Roadmap
             </h2>
 
-            {/* AI Roadmap Generator Widget */}
-            <div className="glass-card" style={{ padding: '24px', marginBottom: '24px', borderLeft: '4px solid var(--accent-violet)', background: 'rgba(255,255,255,0.01)', position: 'relative' }}>
+            {/* Roadmap generator */}
+            <div className="card" style={{ padding: '24px', marginBottom: '24px', borderLeft: '4px solid var(--semantic-primary)', position: 'relative' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                <div style={{ background: 'rgba(168, 85, 247, 0.15)', color: 'var(--accent-violet)', padding: '4px 10px', borderRadius: '12px', fontSize: '0.7rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                  <Sparkles size={11} /> AI Powered
+                <div style={{ background: 'var(--semantic-primary-bg)', color: 'var(--semantic-primary)', padding: '4px 10px', borderRadius: '8px', fontSize: '0.7rem', fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  Suggested plan
                 </div>
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)' }}>Llama 3.1 BuildPlan Architect</h3>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)' }}>Roadmap builder</h3>
               </div>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: 1.5, marginBottom: '16px' }}>
-                Instantly outline a robust, customized 4-week timeline for your project, explicitly allocating weekly duties to active team members based on their skills.
+                Build a focused four-week timeline for this project and assign work to the right people.
               </p>
 
               {aiGenerating ? (
                 <div style={{ padding: '16px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', textAlign: 'center' }}>
-                  <div style={{ border: '3px solid rgba(168, 85, 247, 0.1)', borderTop: '3px solid var(--accent-violet)', borderRadius: '50%', width: '32px', height: '32px', animation: 'spin 1s linear infinite' }} className="animate-spin"></div>
-                  <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 500 }} className="animate-pulse">
-                    Analyzing active team skills & structuring sprints...
+                  <div style={{ border: '3px solid var(--semantic-primary-border)', borderTop: '3px solid var(--semantic-primary)', borderRadius: '50%', width: '32px', height: '32px', animation: 'spin 1s linear infinite' }} className="animate-spin"></div>
+                  <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 500 }}>
+                    Building the roadmap...
                   </div>
                 </div>
               ) : aiRoadmap.length > 0 ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginTop: '16px', background: 'rgba(0,0,0,0.2)', padding: '18px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.04)' }}>
-                  <div style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--accent-violet)', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '8px', marginBottom: '8px' }}>
-                    Proposed 4-Week AI Roadmap
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginTop: '16px', background: 'var(--bg-card)', padding: '18px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 500, textTransform: 'uppercase', color: 'var(--semantic-primary)', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '8px', marginBottom: '8px' }}>
+                    Proposed four-week roadmap
                   </div>
-                  
+
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                     {aiRoadmap.map((item, idx) => (
                       <div key={idx} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-                        <div style={{ background: 'rgba(168, 85, 247, 0.12)', color: 'var(--accent-violet)', width: '22px', height: '22px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 700, marginTop: '2px', flexShrink: 0 }}>
+                        <div style={{ background: 'var(--semantic-primary-bg)', color: 'var(--semantic-primary)', width: '22px', height: '22px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 500, marginTop: '2px', flexShrink: 0 }}>
                           {idx + 1}
                         </div>
                         <div style={{ flex: 1 }}>
@@ -496,18 +496,18 @@ export default function ManageProject({ params }: { params: { id: string } }) {
                     ))}
                   </div>
 
-                  <div style={{ display: 'flex', gap: '10px', marginTop: '16px', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '12px' }}>
-                    <button 
-                      onClick={handlePublishRoadmap} 
-                      disabled={publishingRoadmap} 
-                      className="btn-glow" 
-                      style={{ flex: 1, fontSize: '0.8rem', padding: '8px 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', background: 'linear-gradient(135deg, #10B981, #059669)', border: 'none', boxShadow: '0 4px 12px rgba(16,185,129,0.2)' }}
+                  <div style={{ display: 'flex', gap: '10px', marginTop: '16px', borderTop: '1px solid var(--border-subtle)', paddingTop: '12px' }}>
+                    <button
+                      onClick={handlePublishRoadmap}
+                      disabled={publishingRoadmap}
+                      className="btn-primary"
+                      style={{ flex: 1, fontSize: '0.8rem', padding: '8px 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', background: 'var(--semantic-success-solid)', color: 'var(--semantic-success-fg)', border: 'none' }}
                     >
-                      <Check size={14} /> {publishingRoadmap ? 'Publishing...' : 'Publish AI Plan to Timeline'}
+                      <Check size={14} /> {publishingRoadmap ? 'Publishing...' : 'Publish plan to timeline'}
                     </button>
-                    <button 
-                      onClick={() => setAiRoadmap([])} 
-                      className="btn-ghost" 
+                    <button
+                      onClick={() => setAiRoadmap([])}
+                      className="btn-ghost"
                       style={{ fontSize: '0.8rem', padding: '8px 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', border: '1px solid var(--border-subtle)' }}
                     >
                       <Trash2 size={14} /> Discard
@@ -517,50 +517,48 @@ export default function ManageProject({ params }: { params: { id: string } }) {
               ) : (
                 <div>
                   {aiError && (
-                    <div style={{ padding: '10px', background: 'rgba(239, 68, 68, 0.1)', color: '#EF4444', borderRadius: '8px', fontSize: '0.8rem', marginBottom: '12px', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+                    <div style={{ padding: '10px', background: 'var(--semantic-error-bg)', color: 'var(--semantic-error)', borderRadius: '8px', fontSize: '0.8rem', marginBottom: '12px', border: '1px solid var(--semantic-error-border)' }}>
                       {aiError}
                     </div>
                   )}
-                  <button 
-                    onClick={handleGenerateRoadmap} 
-                    className="btn-ghost" 
-                    style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', borderColor: 'rgba(168, 85, 247, 0.4)', background: 'rgba(168, 85, 247, 0.05)', color: 'var(--accent-violet)', fontWeight: 600, fontSize: '0.9rem', padding: '12px', borderRadius: '14px' }}
+                  <button
+                    onClick={handleGenerateRoadmap}
+                    className="btn-ghost"
+                    style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', borderColor: 'var(--semantic-primary-border)', background: 'var(--semantic-primary-bg)', color: 'var(--semantic-primary)', fontWeight: 600, fontSize: '0.9rem', padding: '12px', borderRadius: '8px' }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.background = 'rgba(168, 85, 247, 0.1)';
-                      e.currentTarget.style.boxShadow = '0 0 15px -3px rgba(168, 85, 247, 0.3)';
+                      e.currentTarget.style.background = 'var(--semantic-primary-bg)';
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.background = 'rgba(168, 85, 247, 0.05)';
-                      e.currentTarget.style.boxShadow = 'none';
+                      e.currentTarget.style.background = 'var(--semantic-primary-bg)';
                     }}
                   >
-                    <Sparkles size={16} /> Generate AI Project Roadmap
+                    Generate roadmap
                   </button>
                 </div>
               )}
             </div>
-            
-            <div className="glass-card" style={{ padding: '24px', marginBottom: '24px' }}>
+
+            <div className="card" style={{ padding: '24px', marginBottom: '24px' }}>
               <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '16px' }}>Post New Milestone</h3>
               <form onSubmit={handlePostMilestone} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <input 
-                  type="text" 
-                  required 
-                  className="search-field" 
+                <input
+                  type="text"
+                  required
+                  className="search-field"
                   placeholder="Milestone Title (e.g. Database Designed)"
                   value={milestoneTitle}
                   onChange={(e) => setMilestoneTitle(e.target.value)}
                 />
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '16px' }}>
-                  <input 
-                    type="date" 
-                    className="search-field" 
+                  <input
+                    type="date"
+                    className="search-field"
                     style={{ colorScheme: 'dark' }}
                     value={milestoneDue}
                     onChange={(e) => setMilestoneDue(e.target.value)}
                   />
-                  <select 
-                    className="search-field" 
+                  <select
+                    className="search-field"
                     style={{ appearance: 'none' }}
                     value={milestoneAssigned}
                     onChange={(e) => setMilestoneAssigned(e.target.value)}
@@ -577,15 +575,15 @@ export default function ManageProject({ params }: { params: { id: string } }) {
                     })}
                   </select>
                 </div>
-                <textarea 
-                  required 
-                  className="search-field" 
+                <textarea
+                  required
+                  className="search-field"
                   placeholder="What is the goal of this milestone?"
                   style={{ minHeight: '100px', resize: 'vertical' }}
                   value={milestoneDesc}
                   onChange={(e) => setMilestoneDesc(e.target.value)}
                 />
-                <button type="submit" disabled={postingMilestone} className="btn-glow" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px' }}>
+                <button type="submit" disabled={postingMilestone} className="btn-primary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px' }}>
                   <Plus size={16} /> {postingMilestone ? 'Posting...' : 'Post Update to Timeline'}
                 </button>
               </form>
@@ -593,7 +591,7 @@ export default function ManageProject({ params }: { params: { id: string } }) {
 
             <h3 style={{ fontSize: '1.2rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '16px' }}>Past Milestones</h3>
             {milestones.length === 0 ? (
-              <div className="glass-card" style={{ padding: '24px', textAlign: 'center' }}>
+              <div className="card" style={{ padding: '24px', textAlign: 'center' }}>
                 <p style={{ color: 'var(--text-secondary)' }}>No milestones posted yet.</p>
               </div>
             ) : (
@@ -603,9 +601,9 @@ export default function ManageProject({ params }: { params: { id: string } }) {
                   try {
                     const parsed = JSON.parse(m.description);
                     if (parsed.desc !== undefined) details = { ...details, ...parsed };
-                  } catch (e) {}
+                  } catch (e) { }
 
-                  const isOverdue = !details.completed && details.due && new Date(details.due) < new Date(new Date().setHours(0,0,0,0));
+                  const isOverdue = !details.completed && details.due && new Date(details.due) < new Date(new Date().setHours(0, 0, 0, 0));
 
                   let assignedName = '';
                   if (details.assigned) {
@@ -618,17 +616,17 @@ export default function ManageProject({ params }: { params: { id: string } }) {
                   }
 
                   return (
-                    <div key={m.id} className="glass-card" style={{ padding: '20px', borderColor: details.completed ? 'rgba(16, 185, 129, 0.3)' : isOverdue ? 'rgba(248, 113, 113, 0.3)' : undefined }}>
+                    <div key={m.id} className="card" style={{ padding: '20px', borderColor: details.completed ? 'var(--semantic-success-border)' : isOverdue ? 'var(--semantic-error-border)' : undefined }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px', flexWrap: 'wrap', gap: '8px' }}>
                         <h4 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>{m.title}</h4>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                           <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                             Added {new Date(m.created_at).toLocaleDateString()}
                           </span>
-                          <button 
+                          <button
                             onClick={() => handleDeleteMilestone(m.id)}
-                            style={{ background: 'transparent', color: '#F87171', opacity: 0.7, border: 'none', padding: '4px', borderRadius: '6px', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
-                            onMouseEnter={(e) => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.background = 'rgba(248, 113, 113, 0.1)'; }}
+                            style={{ background: 'transparent', color: 'var(--semantic-error)', opacity: 0.7, border: 'none', padding: '4px', borderRadius: '6px', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                            onMouseEnter={(e) => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.background = 'var(--semantic-error-bg)'; }}
                             onMouseLeave={(e) => { e.currentTarget.style.opacity = '0.7'; e.currentTarget.style.background = 'transparent'; }}
                             title="Delete Milestone"
                           >
@@ -637,34 +635,34 @@ export default function ManageProject({ params }: { params: { id: string } }) {
                         </div>
                       </div>
                       <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.6, margin: '0 0 16px 0' }}>{details.desc}</p>
-                      
-                      <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '12px', fontSize: '0.85rem', color: 'var(--text-secondary)', borderTop: '1px solid rgba(99,102,241,0.1)', paddingTop: '16px' }}>
+
+                      <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '12px', fontSize: '0.85rem', color: 'var(--text-secondary)', borderTop: '1px solid var(--semantic-primary-border)', paddingTop: '16px' }}>
                         {details.due && (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: isOverdue ? '#f87171' : undefined }}>
-                            <Clock size={14} color={isOverdue ? '#f87171' : '#F59E0B'} /> Due: {new Date(details.due).toLocaleDateString()}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: isOverdue ? 'var(--semantic-error)' : undefined }}>
+                            <Clock size={14} color={isOverdue ? 'var(--semantic-error)' : 'var(--semantic-warning)'} /> Due: {new Date(details.due).toLocaleDateString()}
                           </div>
                         )}
                         {assignedName && (
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <Check size={14} color="var(--accent-emerald)" /> Assigned to: {assignedName}
+                            <Check size={14} color="var(--semantic-success)" /> Assigned to: {assignedName}
                           </div>
                         )}
-                        {isOverdue && <span style={{ color: '#f87171', fontWeight: 700 }}>⚠️ Overdue</span>}
-                        
+                        {isOverdue && <span style={{ color: 'var(--semantic-error)', fontWeight: 600 }}>⚠️ Overdue</span>}
+
                         <div style={{ marginLeft: 'auto' }}>
                           {details.completed ? (
-                            <span style={{ 
-                              display: 'inline-flex', alignItems: 'center', gap: '4px', 
-                              background: 'rgba(16, 185, 129, 0.15)', color: 'var(--accent-emerald)', 
-                              padding: '4px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 600, border: '1px solid rgba(16, 185, 129, 0.2)' 
+                            <span style={{
+                              display: 'inline-flex', alignItems: 'center', gap: '4px',
+                              background: 'var(--semantic-success-bg)', color: 'var(--semantic-success)',
+                              padding: '4px 10px', borderRadius: 'var(--radius-md)', fontSize: '0.75rem', fontWeight: 600, border: '1px solid var(--semantic-success-border)'
                             }}>
                               ✓ Completed {details.completed_at && `on ${new Date(details.completed_at).toLocaleDateString()}`}
                             </span>
                           ) : (
-                            <button 
+                            <button
                               onClick={() => handleCompleteMilestone(m.id, m.description)}
-                              className="btn-ghost" 
-                              style={{ padding: '6px 14px', fontSize: '0.8rem', border: '1px solid rgba(16, 185, 129, 0.3)', color: 'var(--accent-emerald)' }}
+                              className="btn-ghost"
+                              style={{ padding: '6px 14px', fontSize: '0.8rem', border: '1px solid var(--semantic-success-border)', color: 'var(--semantic-success)' }}
                             >
                               Mark Complete
                             </button>
@@ -677,28 +675,28 @@ export default function ManageProject({ params }: { params: { id: string } }) {
               </div>
             )}
           </div>
-          
+
           <div style={{ marginTop: '24px' }}>
-            <h2 style={{ fontSize: '1.4rem', fontWeight: 700, color: '#f87171', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <h2 style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--semantic-error)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <AlertTriangle size={20} /> Danger Zone
             </h2>
-            <div className="glass-card" style={{ padding: '24px', border: '1px solid rgba(248, 113, 113, 0.3)', background: 'rgba(248, 113, 113, 0.05)' }}>
+            <div className="card" style={{ padding: '24px', border: '1px solid var(--semantic-error-border)', background: 'var(--semantic-error-bg)' }}>
               <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '8px' }}>Delete Project</h3>
               <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '16px', lineHeight: 1.5 }}>
                 Once you delete a project, there is no going back. This will remove all applications, milestones, and data associated with this project.
               </p>
-              <button 
+              <button
                 onClick={handleDeleteProject}
                 disabled={deleting}
-                className="btn-ghost" 
-                style={{ 
-                  padding: '10px 24px', 
-                  color: '#f87171', 
-                  border: '1px solid rgba(248, 113, 113, 0.4)', 
-                  display: 'flex', 
-                  alignItems: 'center', 
+                className="btn-primary"
+                style={{
+                  padding: '10px 24px',
+                  color: 'var(--semantic-error-fg)',
+                  border: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
                   gap: '8px',
-                  background: 'rgba(248, 113, 113, 0.1)'
+                  background: 'var(--semantic-error-solid)'
                 }}
               >
                 <Trash2 size={16} /> {deleting ? 'Deleting...' : 'Delete Project'}

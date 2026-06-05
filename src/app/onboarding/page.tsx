@@ -88,7 +88,7 @@ export default function Onboarding() {
 
   return (
     <main className="main-content" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', padding: '40px 20px' }}>
-      <div className="glass-panel" style={{ width: '100%', maxWidth: '800px', padding: '40px' }}>
+      <div className="panel" style={{ width: '100%', maxWidth: '800px', padding: '40px' }}>
         <h1 style={{ fontSize: '2rem', marginBottom: '8px' }}>Complete Your Profile</h1>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '32px' }}>Tell us a bit about yourself so teams can find you.</p>
 
@@ -128,7 +128,7 @@ export default function Onboarding() {
           <div>
             <label style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px', fontWeight: 500 }}>
               <span>Technical Skills</span>
-              <span style={{ color: skills.length === 15 ? '#F87171' : 'var(--text-secondary)' }}>{skills.length} / 15</span>
+              <span style={{ color: skills.length === 15 ? 'var(--semantic-error)' : 'var(--text-secondary)' }}>{skills.length} / 15</span>
             </label>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
               {PREDEFINED_SKILLS.map(skill => {
@@ -142,13 +142,13 @@ export default function Onboarding() {
                     disabled={isDisabled}
                     style={{
                       padding: '8px 16px',
-                      borderRadius: '20px',
+                      borderRadius: 'var(--radius-md)',
                       fontSize: '0.85rem',
                       fontWeight: 500,
                       cursor: isDisabled ? 'not-allowed' : 'pointer',
-                      border: isSelected ? '1px solid #818CF8' : '1px solid var(--border-color)',
-                      background: isSelected ? 'rgba(99, 102, 241, 0.1)' : 'var(--bg-surface)',
-                      color: isSelected ? '#818CF8' : (isDisabled ? 'var(--text-secondary)' : 'var(--text-primary)'),
+                      border: isSelected ? '1px solid var(--semantic-primary-border)' : '1px solid var(--border-color)',
+                      background: isSelected ? 'var(--semantic-primary-bg)' : 'var(--bg-surface)',
+                      color: isSelected ? 'var(--semantic-primary)' : (isDisabled ? 'var(--text-secondary)' : 'var(--text-primary)'),
                       transition: 'all 0.2s'
                     }}
                   >

@@ -97,10 +97,10 @@ export default function Navbar() {
   return (
     <nav className="navbar">
       <Link href="/" className="nav-brand" onClick={closeMenu}>
-        <div className="brand-icon">
+        <div className="brand-icon" style={{ background: 'linear-gradient(135deg, #5b7cff 0%, #8b5cf6 100%)' }}>
           <Zap size={18} />
         </div>
-        ProjectHub
+        <span style={{ color: '#f8fafc', fontWeight: 700, letterSpacing: '-0.3px' }}>ProjectHub</span>
       </Link>
 
       <button className="mobile-toggle" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
@@ -150,15 +150,15 @@ export default function Navbar() {
         {user ? (
           <div className="nav-actions">
             {(userRole !== 'admin' && userRole !== 'faculty') && (
-              <Link href="/post" onClick={closeMenu} style={{ width: '100%' }}>
-                <button className="btn-glow" style={{ width: '100%', whiteSpace: 'nowrap' }}>Post Project</button>
+              <Link href="/post" onClick={closeMenu} className="nav-btn-wrapper">
+                <button className="btn-primary navbar-btn" style={{ whiteSpace: 'nowrap' }}>Post project</button>
               </Link>
             )}
-            <button className="btn-ghost" onClick={handleLogout} style={{ width: '100%', whiteSpace: 'nowrap' }}>Log Out</button>
+            <button className="btn-ghost navbar-btn" onClick={handleLogout} style={{ whiteSpace: 'nowrap' }}>Log out</button>
           </div>
         ) : (
-          <Link href="/login" onClick={closeMenu} style={{ width: '100%' }}>
-            <button className="btn-glow" style={{ width: '100%', whiteSpace: 'nowrap' }}>Log In</button>
+          <Link href="/login" onClick={closeMenu} className="nav-btn-wrapper">
+            <button className="btn-primary navbar-btn" style={{ whiteSpace: 'nowrap' }}>Log in</button>
           </Link>
         )}
       </div>

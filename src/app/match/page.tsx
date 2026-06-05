@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Sparkles, Cpu, Award, Users, Clock, ArrowRight, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { Cpu, Award, Users, Clock, ArrowRight, ShieldCheck } from 'lucide-react';
 
 import { useAuth } from '../../components/AuthProvider';
 import { supabase } from '../../lib/supabase';
@@ -75,7 +75,7 @@ export default function SkillMatchPage() {
             teamSize: project.team_size,
             stage: project.stage,
             founder: project.users?.full_name || 'Anonymous',
-            founderAvatar: project.users?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(project.users?.full_name || 'Anonymous')}&background=6366f1&color=fff`,
+            founderAvatar: project.users?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(project.users?.full_name || 'Anonymous')}&background=d0d7de&color=24292f`,
             skillsRequired: reqSkills,
             matchedSkills,
             missingSkills,
@@ -101,42 +101,37 @@ export default function SkillMatchPage() {
     }
   }, [user, authLoading, router]);
 
-  // Color picker helper for match score indicators
   const getMatchColor = (score: number) => {
-    if (score >= 80) return { bg: 'rgba(16, 185, 129, 0.15)', text: '#10B981', border: 'rgba(16, 185, 129, 0.3)', glow: 'rgba(16, 185, 129, 0.4)' };
-    if (score >= 60) return { bg: 'rgba(99, 102, 241, 0.15)', text: '#818CF8', border: 'rgba(99, 102, 241, 0.3)', glow: 'rgba(99, 102, 241, 0.3)' };
-    return { bg: 'rgba(245, 158, 11, 0.15)', text: '#F59E0B', border: 'rgba(245, 158, 11, 0.3)', glow: 'rgba(245, 158, 11, 0.2)' };
+    if (score >= 80) return { bg: 'var(--semantic-success-bg)', text: 'var(--semantic-success)', border: 'var(--semantic-success-border)', fg: 'var(--semantic-success-fg)', solid: 'var(--semantic-success-solid)' };
+    if (score >= 60) return { bg: 'var(--semantic-primary-bg)', text: 'var(--semantic-primary)', border: 'var(--semantic-primary-border)', fg: 'var(--semantic-primary-fg)', solid: 'var(--semantic-primary-solid)' };
+    return { bg: 'var(--semantic-warning-bg)', text: 'var(--semantic-warning)', border: 'var(--semantic-warning-border)', fg: 'var(--semantic-warning-fg)', solid: 'var(--semantic-warning-solid)' };
   };
 
   return (
-    <main className="main-content" style={{ maxWidth: '1150px', paddingTop: '110px' }}>
-      
+    <main className="main-content" style={{ maxWidth: '1150px', paddingTop: '88px' }}>
+
       {/* Title & Introduction Section */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '12px' }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(168, 85, 247, 0.1)', color: '#C084FC', padding: '6px 14px', borderRadius: '30px', fontSize: '0.8rem', fontWeight: 600, width: 'fit-content', border: '1px solid rgba(168, 85, 247, 0.2)' }}>
-          <Sparkles size={14} className="animate-pulse" />
-          AI-Powered Smart Recommendations
-        </div>
-        <h1 style={{ fontSize: '3rem', fontWeight: 800, letterSpacing: '-1px', background: 'linear-gradient(to right, #ffffff, #d4d4d8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-          AI SkillMatch Radar
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '12px' }}>
+        <h1 style={{ fontSize: '1.75rem', fontWeight: 700, letterSpacing: '-0.5px', color: 'var(--text-primary)', margin: 0 }}>
+          Project Match
         </h1>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '1.05rem', maxWidth: '650px', lineHeight: 1.6 }}>
-          Our neural engine analyzes your engineering background, project descriptions, and technical competencies using semantic search to discover your ultimate hackathon or project matches.
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', maxWidth: '650px', lineHeight: 1.4 }}>
+          View project recommendations based on your profile, skills, and the project details already in the workspace.
         </p>
       </div>
 
-      {/* Glassmorphic User Profile Summary Context Card */}
+      {/* User profile summary */}
       {userProfile && (
-        <div className="glass-panel animate-fade-in delay-1" style={{ padding: '24px', display: 'flex', flexWrap: 'wrap', gap: '24px', justifyContent: 'space-between', alignItems: 'center', borderLeft: '4px solid #a855f7', background: 'rgba(255, 255, 255, 0.01)', boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.05)' }}>
+        <div className="panel" style={{ padding: '24px', display: 'flex', flexWrap: 'wrap', gap: '24px', justifyContent: 'space-between', alignItems: 'center', borderLeft: '4px solid var(--semantic-primary)', marginBottom: '0px' }}>
           <div style={{ display: 'flex', gap: '16px', alignItems: 'center', minWidth: '280px' }}>
-            <div style={{ background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2))', width: '56px', height: '56px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#C084FC', border: '1px solid rgba(168, 85, 247, 0.3)' }}>
+            <div style={{ background: 'var(--bg-surface-hover)', width: '56px', height: '56px', borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--semantic-primary)', border: '1px solid var(--border-subtle)' }}>
               <Cpu size={28} />
             </div>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <h3 style={{ fontSize: '1.2rem', fontWeight: 600 }}>{userProfile.full_name || 'Collaborator'}</h3>
-                <span style={{ fontSize: '0.7rem', color: '#10B981', background: 'rgba(16, 185, 129, 0.1)', padding: '2px 8px', borderRadius: '20px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10B981', display: 'inline-block' }}></span> Radar Active
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 500 }}>{userProfile.full_name || 'Collaborator'}</h3>
+                <span style={{ fontSize: '0.7rem', color: 'var(--semantic-success)', background: 'var(--semantic-success-bg)', padding: '2px 8px', borderRadius: '8px', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--semantic-success)', display: 'inline-block' }}></span> Active
                 </span>
               </div>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', textTransform: 'capitalize' }}>
@@ -146,36 +141,36 @@ export default function SkillMatchPage() {
           </div>
 
           <div style={{ flex: 1, minWidth: '300px' }}>
-            <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-secondary)', marginBottom: '8px', fontWeight: 600 }}>
-              AI Analyzed Competencies ({userSkills.length})
+            <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-secondary)', marginBottom: '8px', fontWeight: 500 }}>
+              Skills ({userSkills.length})
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
               {(showAllSkills ? userSkills : userSkills.slice(0, 8)).map(skill => (
-                <span key={skill} style={{ fontSize: '0.75rem', background: 'rgba(255, 255, 255, 0.04)', color: '#E4E4E7', border: '1px solid rgba(255, 255, 255, 0.08)', padding: '4px 10px', borderRadius: '20px', fontWeight: 500 }}>
+                <span key={skill} style={{ fontSize: '0.75rem', background: 'var(--bg-interactive-neutral)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)', padding: '4px 10px', borderRadius: '8px', fontWeight: 500 }}>
                   {skill}
                 </span>
               ))}
               {userSkills.length > 8 && (
-                <button 
+                <button
                   onClick={() => setShowAllSkills(!showAllSkills)}
-                  style={{ 
-                    fontSize: '0.75rem', 
-                    color: '#A855F7', 
-                    background: 'rgba(168, 85, 247, 0.1)', 
-                    border: '1px solid rgba(168, 85, 247, 0.25)',
-                    padding: '4px 10px', 
-                    borderRadius: '20px', 
+                  style={{
+                    fontSize: '0.75rem',
+                    color: 'var(--semantic-primary)',
+                    background: 'var(--semantic-primary-bg)',
+                    border: '1px solid var(--semantic-primary-border)',
+                    padding: '4px 10px',
+                    borderRadius: '8px',
                     fontWeight: 600,
                     cursor: 'pointer',
                     transition: 'all 0.2s',
                     outline: 'none'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'rgba(168, 85, 247, 0.2)';
+                    e.currentTarget.style.background = 'var(--semantic-primary-border)';
                     e.currentTarget.style.transform = 'scale(1.05)';
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'rgba(168, 85, 247, 0.1)';
+                    e.currentTarget.style.background = 'var(--semantic-primary-bg)';
                     e.currentTarget.style.transform = 'scale(1)';
                   }}
                 >
@@ -189,133 +184,170 @@ export default function SkillMatchPage() {
 
       {/* Main Results Listing */}
       {aiLoading ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '24px', marginTop: '10px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '24px', marginTop: '0px' }}>
           {[1, 2, 3].map((n) => (
-            <div key={n} className="glass-panel" style={{ height: '340px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', position: 'relative', overflow: 'hidden' }}>
-              <div style={{ height: '3px', width: '100%', position: 'absolute', top: 0, left: 0, background: 'rgba(255,255,255,0.05)' }}></div>
+            <div key={n} className="panel" style={{ height: '340px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', position: 'relative', overflow: 'hidden' }}>
+              <div style={{ height: '3px', width: '100%', position: 'absolute', top: 0, left: 0, background: 'var(--border-subtle)' }}></div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <div className="animate-pulse" style={{ background: 'rgba(255, 255, 255, 0.04)', height: '18px', width: '80px', borderRadius: '4px' }}></div>
-                <div className="animate-pulse" style={{ background: 'rgba(255, 255, 255, 0.04)', height: '24px', width: '60px', borderRadius: '8px' }}></div>
+                <div style={{ background: 'var(--bg-interactive-neutral)', height: '18px', width: '80px', borderRadius: '4px' }}></div>
+                <div style={{ background: 'var(--bg-interactive-neutral)', height: '24px', width: '60px', borderRadius: '8px' }}></div>
               </div>
-              <div className="animate-pulse" style={{ background: 'rgba(255, 255, 255, 0.04)', height: '32px', width: '70%', borderRadius: '6px' }}></div>
-              <div className="animate-pulse" style={{ background: 'rgba(255, 255, 255, 0.04)', height: '60px', width: '100%', borderRadius: '8px' }}></div>
+              <div style={{ background: 'var(--bg-interactive-neutral)', height: '32px', width: '70%', borderRadius: '6px' }}></div>
+              <div style={{ background: 'var(--bg-interactive-neutral)', height: '60px', width: '100%', borderRadius: '8px' }}></div>
               <div style={{ display: 'flex', gap: '8px', marginTop: 'auto' }}>
-                <div style={{ background: 'rgba(255, 255, 255, 0.04)', height: '24px', width: '60px', borderRadius: '20px' }}></div>
-                <div style={{ background: 'rgba(255, 255, 255, 0.04)', height: '24px', width: '70px', borderRadius: '20px' }}></div>
-                <div style={{ background: 'rgba(255, 255, 255, 0.04)', height: '24px', width: '65px', borderRadius: '20px' }}></div>
+                <div style={{ background: 'var(--bg-interactive-neutral)', height: '24px', width: '60px', borderRadius: 'var(--radius-md)' }}></div>
+                <div style={{ background: 'var(--bg-interactive-neutral)', height: '24px', width: '70px', borderRadius: 'var(--radius-md)' }}></div>
+                <div style={{ background: 'var(--bg-interactive-neutral)', height: '24px', width: '65px', borderRadius: 'var(--radius-md)' }}></div>
               </div>
             </div>
           ))}
         </div>
       ) : aiError ? (
-        <div className="glass-panel" style={{ padding: '40px', textAlign: 'center', color: '#F87171', border: '1px solid rgba(248, 113, 113, 0.2)', background: 'rgba(248, 113, 113, 0.02)' }}>
-          <p style={{ fontWeight: 600, fontSize: '1.1rem', marginBottom: '8px' }}>Execution Failed</p>
+        <div className="panel" style={{ padding: '40px', textAlign: 'center', color: 'var(--semantic-error)', border: '1px solid var(--semantic-error-border)', background: 'var(--semantic-error-bg)' }}>
+          <p style={{ fontWeight: 500, fontSize: '1.1rem', marginBottom: '8px' }}>Execution Failed</p>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>{aiError}</p>
         </div>
       ) : aiProjects.length === 0 ? (
-        <div className="glass-panel" style={{ padding: '60px 40px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
-          <div style={{ background: 'rgba(255, 255, 255, 0.02)', width: '72px', height: '72px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>
+        <div className="panel" style={{ padding: '60px 40px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+          <div style={{ background: 'var(--bg-interactive-neutral)', width: '72px', height: '72px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>
             <Award size={36} />
           </div>
-          <h3 style={{ fontSize: '1.35rem', fontWeight: 600 }}>No Matching Recommendations</h3>
+          <h3 style={{ fontSize: '1.35rem', fontWeight: 500 }}>No Matching Recommendations</h3>
           <p style={{ color: 'var(--text-secondary)', maxWidth: '420px', fontSize: '0.95rem', lineHeight: 1.6 }}>
             The AI engine couldn't match any projects. Try adding more skills to your profile to expand your search spectrum!
           </p>
           <Link href="/profile">
-            <button className="btn-primary" style={{ padding: '10px 24px' }}>Edit Your Skills</button>
+            <button className="btn-primary" style={{ padding: '10px 24px' }}>Edit your skills</button>
           </Link>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '0px' }}>
           {/* Header count indicator */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px', marginTop: '16px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px', marginTop: '0px' }}>
             <span style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', fontWeight: 500 }}>
-              Showing <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{aiProjects.length} AI Matches</span> based on semantic analysis
+              Showing <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{aiProjects.length} matches</span> based on your profile
             </span>
           </div>
 
-          {/* Glowing AI Synergy Cards Grid */}
+          {/* Match cards */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: '28px' }}>
-            {aiProjects.map((project, idx) => {
+            {aiProjects.map((project) => {
               const styles = getMatchColor(project.matchScore);
               return (
-                <div 
-                  key={project.id} 
-                  className="glass-panel animate-fade-in"
-                  style={{ 
-                    animationDelay: `${(idx * 0.1) + 0.2}s`, 
-                    padding: '28px', 
-                    display: 'flex', 
-                    flexDirection: 'column', 
-                    gap: '20px', 
-                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', 
+                <div
+                  key={project.id}
+                  className="panel"
+                  style={{
+                    padding: '28px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0px',
+                    transition: 'border-color 0.2s ease',
                     position: 'relative',
                     overflow: 'hidden',
-                    cursor: 'default',
-                    boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
+                    cursor: 'default'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-6px)';
                     e.currentTarget.style.borderColor = styles.text;
-                    e.currentTarget.style.boxShadow = `0 12px 30px -10px ${styles.glow}`;
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
                     e.currentTarget.style.borderColor = 'var(--border-color)';
-                    e.currentTarget.style.boxShadow = '0 4px 30px rgba(0, 0, 0, 0.1)';
                   }}
                 >
-                  {/* Neon Top Match Score Progress line */}
-                  <div style={{ height: '3px', width: '100%', position: 'absolute', top: 0, left: 0, background: `linear-gradient(to right, ${styles.text}, var(--accent-secondary))` }}></div>
+                  <div style={{ height: '3px', width: '100%', position: 'absolute', top: 0, left: 0, background: styles.text }}></div>
 
-                  {/* Card Header */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <div>
-                      <span style={{ fontSize: '0.7rem', color: styles.text, background: styles.bg, border: `1px solid ${styles.border}`, padding: '4px 10px', borderRadius: '30px', fontWeight: 700, letterSpacing: '0.5px', textTransform: 'uppercase' }}>
-                        {project.type}
-                      </span>
-                      <h3 style={{ fontSize: '1.35rem', fontWeight: 700, marginTop: '10px', lineHeight: 1.25, letterSpacing: '-0.3px' }}>
-                        {project.title}
-                      </h3>
-                    </div>
-
-                    {/* Glowing circular Match Gauge */}
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: styles.bg, border: `1px solid ${styles.border}`, borderRadius: '14px', width: '64px', height: '64px', minWidth: '64px', boxShadow: `0 0 15px -3px ${styles.glow}` }}>
-                      <div style={{ fontSize: '1.25rem', fontWeight: 800, color: styles.text, lineHeight: 1 }}>
-                        {project.matchScore}%
+                  {/* Header & Title Wrapper */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
+                    {/* Card Header */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <div>
+                        <span style={{ fontSize: '0.7rem', color: styles.text, background: styles.bg, border: `1px solid ${styles.border}`, padding: '2px 8px', borderRadius: '4px', fontWeight: 500, letterSpacing: '0.5px', textTransform: 'uppercase' }}>
+                          {project.type}
+                        </span>
                       </div>
-                      <div style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 700, marginTop: '2px' }}>
-                        Match
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', lineHeight: 1 }}>
+                        <span style={{ fontSize: '2rem', fontWeight: 700, color: styles.text }}>
+                          {project.matchScore}%
+                        </span>
+                        <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-dim)', fontWeight: 500, marginTop: '2px' }}>
+                          match
+                        </span>
                       </div>
                     </div>
+
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: 600, lineHeight: 1.25, letterSpacing: '-0.3px', margin: 0 }}>
+                      {project.title}
+                    </h3>
                   </div>
 
                   {/* Project Description */}
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.6, margin: 0, minHeight: '68px', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.6, margin: '0 0 16px 0', minHeight: '68px', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                     {project.description}
                   </p>
 
                   {/* Detailed Skill Synergy Analysis */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', borderTop: '1px solid rgba(255, 255, 255, 0.04)', paddingTop: '16px' }}>
-                    <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <ShieldCheck size={14} color="#10B981" />
-                      Skill Synergy Analyzer
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', borderTop: '1px solid var(--border-subtle)', paddingTop: '16px', fontSize: '0.8rem', marginTop: '12px' }}>
+                    <div style={{ fontWeight: 500, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <ShieldCheck size={14} color="var(--semantic-success)" />
+                      Skill Synergy
                     </div>
-                    
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                      {/* Matched Skills with glow */}
-                      {project.matchedSkills.map((skill: string) => (
-                        <span key={skill} style={{ fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(16, 185, 129, 0.08)', color: '#34D399', border: '1px solid rgba(16, 185, 129, 0.25)', padding: '3px 8px', borderRadius: '6px', fontWeight: 600 }}>
-                          <CheckCircle2 size={10} /> {skill}
-                        </span>
-                      ))}
 
-                      {/* Missing skills */}
-                      {project.missingSkills.map((skill: string) => (
-                        <span key={skill} style={{ fontSize: '0.7rem', background: 'rgba(255, 255, 255, 0.03)', color: 'var(--text-secondary)', border: '1px solid rgba(255, 255, 255, 0.06)', padding: '3px 8px', borderRadius: '6px', fontWeight: 500 }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', alignItems: 'center' }}>
+                      {project.matchedSkills.slice(0, 4).map((skill: string) => (
+                        <span key={skill} style={{
+                          padding: '2px 7px',
+                          borderRadius: 'var(--radius-md)',
+                          background: 'var(--semantic-success-bg)',
+                          border: '1px solid var(--semantic-success-border)',
+                          color: 'var(--semantic-success)',
+                          fontSize: '0.71rem',
+                          fontWeight: 500,
+                          whiteSpace: 'nowrap'
+                        }}>
                           {skill}
                         </span>
                       ))}
+                      {project.matchedSkills.length > 4 && (
+                        <span style={{
+                          padding: '2px 7px',
+                          borderRadius: 'var(--radius-md)',
+                          background: 'var(--bg-surface-hover)',
+                          border: '1px solid var(--border-subtle)',
+                          color: 'var(--text-dim)',
+                          fontSize: '0.71rem',
+                          fontWeight: 500
+                        }}>
+                          +{project.matchedSkills.length - 4} more
+                        </span>
+                      )}
+
+                      {project.missingSkills.slice(0, 4).map((skill: string) => (
+                        <span key={skill} style={{
+                          padding: '2px 7px',
+                          borderRadius: 'var(--radius-md)',
+                          background: 'var(--bg-surface-hover)',
+                          border: '1px solid var(--border-subtle)',
+                          color: 'var(--text-dim)',
+                          fontSize: '0.71rem',
+                          fontWeight: 500,
+                          whiteSpace: 'nowrap'
+                        }}>
+                          {skill}
+                        </span>
+                      ))}
+                      {project.missingSkills.length > 4 && (
+                        <span style={{
+                          padding: '2px 7px',
+                          borderRadius: 'var(--radius-md)',
+                          background: 'var(--bg-surface-hover)',
+                          border: '1px solid var(--border-subtle)',
+                          color: 'var(--text-dim)',
+                          fontSize: '0.71rem',
+                          fontWeight: 500
+                        }}>
+                          +{project.missingSkills.length - 4} more
+                        </span>
+                      )}
                     </div>
                   </div>
 
@@ -323,13 +355,13 @@ export default function SkillMatchPage() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border-color)', paddingTop: '16px', marginTop: 'auto' }}>
                     {/* Founder Row */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <img 
-                        src={project.founderAvatar} 
-                        alt={project.founder} 
+                      <img
+                        src={project.founderAvatar}
+                        alt={project.founder}
                         style={{ width: '28px', height: '28px', borderRadius: '50%', border: '1px solid var(--border-color)' }}
                       />
                       <div>
-                        <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                        <div style={{ fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-primary)' }}>
                           {project.founder}
                         </div>
                         <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>
@@ -346,13 +378,13 @@ export default function SkillMatchPage() {
                       </div>
 
                       <Link href={`/projects/${project.id}`}>
-                        <button 
-                          className="btn-primary" 
-                          style={{ 
-                            padding: '8px 14px', 
-                            fontSize: '0.8rem', 
-                            display: 'flex', 
-                            alignItems: 'center', 
+                        <button
+                          className="btn-primary"
+                          style={{
+                            padding: '8px 14px',
+                            fontSize: '0.8rem',
+                            display: 'flex',
+                            alignItems: 'center',
                             gap: '4px',
                             background: styles.bg,
                             border: `1px solid ${styles.border}`,
@@ -362,8 +394,8 @@ export default function SkillMatchPage() {
                             transition: 'all 0.2s'
                           }}
                           onMouseEnter={(e) => {
-                            e.currentTarget.style.background = styles.text;
-                            e.currentTarget.style.color = '#fff';
+                            e.currentTarget.style.background = styles.solid;
+                            e.currentTarget.style.color = styles.fg;
                           }}
                           onMouseLeave={(e) => {
                             e.currentTarget.style.background = styles.bg;

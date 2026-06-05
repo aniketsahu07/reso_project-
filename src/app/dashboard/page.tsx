@@ -3,16 +3,45 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '../../lib/supabase';
-import { Code, Clock, Users as UsersIcon, ChevronRight, Compass, Send } from 'lucide-react';
+import { Clock, Users as UsersIcon, ChevronRight, Compass } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '../../components/AuthProvider';
 
 const statusBadgeClass = (status: string) => {
   switch (status) {
-    case 'Open': return 'badge badge-indigo';
+    case 'Open': return 'badge badge-primary';
     case 'Active': return 'badge badge-success';
-    case 'Completed': return 'badge badge-purple';
-    default: return 'badge badge-indigo';
+    case 'Completed': return 'badge badge-success';
+    default: return 'badge badge-primary';
+  }
+};
+
+const applicationStatusStyles = (status: string) => {
+  switch (status) {
+    case 'Pending':
+      return {
+        background: 'var(--semantic-warning-bg)',
+        color: 'var(--semantic-warning)',
+        border: '1px solid var(--semantic-warning-border)'
+      };
+    case 'Declined':
+      return {
+        background: 'var(--semantic-error-bg)',
+        color: 'var(--semantic-error)',
+        border: '1px solid var(--semantic-error-border)'
+      };
+    case 'Removed':
+      return {
+        background: 'var(--semantic-neutral-bg)',
+        color: 'var(--text-secondary)',
+        border: '1px solid var(--semantic-neutral-border)'
+      };
+    default:
+      return {
+        background: 'var(--semantic-primary-bg)',
+        color: 'var(--semantic-primary)',
+        border: '1px solid var(--semantic-primary-border)'
+      };
   }
 };
 
@@ -57,7 +86,7 @@ export default function Dashboard() {
 
       setLoading(false);
     }
-    
+
     if (!authLoading) {
       loadDashboard();
     }
@@ -77,10 +106,10 @@ export default function Dashboard() {
             height: '48px',
             borderRadius: '50%',
             border: '3px solid var(--border-subtle)',
-            borderTopColor: 'var(--accent-indigo)',
+            borderTopColor: 'var(--semantic-primary)',
             animation: 'spin 0.8s linear infinite'
           }} />
-          <span style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', fontWeight: 500 }}>
+          <span className="body-text">
             Loading Dashboard...
           </span>
           <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
@@ -91,297 +120,262 @@ export default function Dashboard() {
 
   const activeTeams = myApplications.filter(app => app.status === 'Accepted');
   const otherApps = myApplications.filter(app => app.status !== 'Accepted');
+  const pendingApplications = myApplications.filter(app => app.status === 'Pending');
+  const applicationUpdates = [...otherApps].sort((left, right) => {
+    const priority: Record<string, number> = { Pending: 0, Declined: 1, Removed: 2 };
+    return (priority[left.status] ?? 99) - (priority[right.status] ?? 99);
+  });
 
   return (
-    <main className="main-content" style={{ maxWidth: '1000px' }}>
+    <main className="main-content" style={{ maxWidth: '1120px' }}>
       <div>
-        <h1 className="section-title" style={{ marginBottom: '8px' }}>Dashboard</h1>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '1.05rem', fontWeight: 400 }}>
+        <h1 className="section-title h1-page" style={{ marginBottom: '8px' }}>Dashboard</h1>
+        <p className="body-text" style={{ color: 'var(--text-secondary)' }}>
           Manage the projects you lead and track your applications.
         </p>
       </div>
 
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-        gap: '24px'
+        gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+        gap: '14px',
+        margin: '16px 0 20px'
+      }}>
+        <div className="card" style={{ 
+          padding: '18px 20px', 
+          display: 'flex', 
+          flexDirection: 'column', 
+          gap: '6px', 
+          background: '#1e2a3a',
+          border: '1px solid #334155',
+          borderLeft: '4px solid #5b7cff' 
+        }}>
+          <div style={{ fontSize: '0.875rem', color: '#E2E8F0', fontWeight: 600 }}>Projects Led</div>
+          <div style={{ fontSize: '2rem', fontWeight: 800, color: '#FFFFFF', lineHeight: 1 }}>{myProjects.length}</div>
+        </div>
+
+        <div className="card" style={{ 
+          padding: '18px 20px', 
+          display: 'flex', 
+          flexDirection: 'column', 
+          gap: '6px', 
+          background: '#1e2a3a',
+          border: '1px solid #334155',
+          borderLeft: '4px solid #22c55e' 
+        }}>
+          <div style={{ fontSize: '0.875rem', color: '#E2E8F0', fontWeight: 600 }}>Teams Joined</div>
+          <div style={{ fontSize: '2rem', fontWeight: 800, color: '#FFFFFF', lineHeight: 1 }}>{activeTeams.length}</div>
+        </div>
+
+        <div className="card" style={{ 
+          padding: '18px 20px', 
+          display: 'flex', 
+          flexDirection: 'column', 
+          gap: '6px', 
+          background: '#1e2a3a',
+          border: '1px solid #334155',
+          borderLeft: '4px solid #f59e0b' 
+        }}>
+          <div style={{ fontSize: '0.875rem', color: '#E2E8F0', fontWeight: 600 }}>Pending Reviews</div>
+          <div style={{ fontSize: '2rem', fontWeight: 800, color: '#FFFFFF', lineHeight: 1 }}>{pendingApplications.length}</div>
+        </div>
+      </div>
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '2fr 1fr',
+        gap: '16px',
+        alignItems: 'start'
       }}>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <h2 style={{
-              fontSize: '1.4rem',
-              fontWeight: 700,
-              color: 'var(--text-primary)',
-              letterSpacing: '-0.3px'
-            }}>My Projects</h2>
-            <Link href="/post">
-              <button className="btn-glow" style={{ padding: '8px 18px', minHeight: '44px', fontSize: '0.85rem' }}>
-                + New Project
-              </button>
-            </Link>
-          </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <h2 className="h2-section" style={{ color: 'var(--text-primary)', fontSize: '1.2rem', fontWeight: 600 }}>My Projects</h2>
 
           {myProjects.length === 0 ? (
-            <div className="glass-card" style={{ padding: '48px 32px', textAlign: 'center' }}>
-              <div style={{
-                width: '64px',
-                height: '64px',
-                borderRadius: 'var(--radius-md)',
-                background: 'rgba(99, 102, 241, 0.1)',
-                border: '1px solid rgba(99, 102, 241, 0.2)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                margin: '0 auto 20px auto'
-              }}>
-                <Code size={28} style={{ color: 'var(--accent-indigo)' }} />
-              </div>
-              <p style={{
-                color: 'var(--text-secondary)',
-                fontSize: '0.95rem',
-                marginBottom: '20px'
-              }}>You haven&apos;t posted any projects yet.</p>
+            <div className="card" style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+              <p className="body-text" style={{ margin: 0, fontSize: '0.88rem' }}>No projects managed yet.</p>
               <Link href="/post">
-                <button className="btn-glow" style={{ minHeight: '44px', padding: '10px 28px' }}>
-                  Create Your First Project
+                <button className="btn-primary" style={{ padding: '6px 12px', fontSize: '0.82rem', borderRadius: 'var(--radius-sm)', color: '#FFFFFF', fontWeight: 'bold' }}>
+                  Create project
                 </button>
               </Link>
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {myProjects.map(project => (
-                <div key={project.id} className="glass-card glow-border" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                <div key={project.id} className="card" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', flex: 1, minWidth: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                        <span className={statusBadgeClass(project.status)}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                        <span className={`${statusBadgeClass(project.status)} status-text`} style={{ fontSize: '0.7rem', padding: '2px 8px', borderRadius: 'var(--radius-sm)' }}>
                           {project.status}
                         </span>
                         {project.pendingCount > 0 && (
-                          <span style={{
-                            background: 'linear-gradient(135deg, var(--accent-indigo), var(--accent-violet))',
-                            color: 'white',
-                            padding: '3px 10px',
-                            borderRadius: 'var(--radius-full)',
-                            fontSize: '0.72rem',
-                            fontWeight: 700,
-                            letterSpacing: '0.3px',
-                            boxShadow: '0 0 12px rgba(99, 102, 241, 0.4), 0 0 24px rgba(99, 102, 241, 0.2)',
-                            animation: 'pulseGlow 2s ease-in-out infinite'
+                          <span className="status-text" style={{
+                            background: 'var(--semantic-primary-solid)',
+                            color: 'var(--semantic-primary-fg)',
+                            padding: '2px 8px',
+                            borderRadius: 'var(--radius-sm)',
+                            fontSize: '0.7rem'
                           }}>
                             {project.pendingCount} New
                           </span>
                         )}
                       </div>
-                      <h3 style={{
-                        fontSize: '1.15rem',
-                        fontWeight: 600,
-                        color: 'var(--text-primary)',
-                        margin: 0,
-                        lineHeight: 1.3
-                      }}>
+                      <h3 className="h3-card" style={{ margin: 0, fontSize: '1rem', fontWeight: 600 }}>
                         {project.title}
                       </h3>
                     </div>
                   </div>
-                  <div style={{
+                  <div className="meta-text" style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '16px',
-                    color: 'var(--text-secondary)',
-                    fontSize: '0.85rem'
+                    gap: '12px',
+                    fontSize: '0.8rem'
                   }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                      <UsersIcon size={14} /> {project.team_size}
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <UsersIcon size={12} /> {project.team_size} members
                     </span>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                      <Clock size={14} /> {project.commitment}
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <Clock size={12} /> {project.commitment}
                     </span>
                   </div>
                   <Link href={`/projects/${project.id}/manage`} style={{ width: '100%' }}>
-                    <button className="btn-ghost" style={{
+                    <button className="btn-ghost body-text" style={{
                       width: '100%',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      gap: '6px',
-                      minHeight: '44px'
+                      gap: '4px',
+                      minHeight: '36px',
+                      fontSize: '0.85rem',
+                      borderRadius: 'var(--radius-sm)'
                     }}>
-                      Manage <ChevronRight size={15} />
+                      Manage Project <ChevronRight size={14} />
                     </button>
                   </Link>
                 </div>
               ))}
             </div>
           )}
+
+          {/* My Active Teams Section */}
+          <div style={{ marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <h2 className="h2-section" style={{ color: 'var(--text-primary)', fontSize: '1.2rem', fontWeight: 600 }}>My Active Teams</h2>
+
+            {activeTeams.length === 0 ? (
+              <div className="card" style={{ padding: '12px 16px', color: 'var(--text-secondary)' }}>
+                <p className="body-text" style={{ margin: 0, fontSize: '0.88rem' }}>No active teams joined yet.</p>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {activeTeams.map(app => (
+                  <div key={app.id} className="card" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                          <span className="badge badge-success status-text" style={{ fontSize: '0.7rem', padding: '2px 8px', borderRadius: 'var(--radius-sm)' }}>
+                            Active Team Member
+                          </span>
+                        </div>
+                        <h3 className="h3-card" style={{ margin: 0, fontSize: '1rem', fontWeight: 600 }}>
+                          {app.projects?.title}
+                        </h3>
+                      </div>
+                    </div>
+                    <div className="meta-text" style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      fontSize: '0.8rem'
+                    }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        Type: {app.projects?.type}
+                      </span>
+                    </div>
+                    <Link href={`/projects/${app.projects?.id}`} style={{ width: '100%' }}>
+                      <button className="btn-ghost body-text" style={{
+                        width: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '4px',
+                        minHeight: '36px',
+                        fontSize: '0.85rem',
+                        borderRadius: 'var(--radius-sm)'
+                      }}>
+                        View Project <ChevronRight size={14} />
+                      </button>
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-
-          <h2 style={{
-            fontSize: '1.4rem',
-            fontWeight: 700,
-            letterSpacing: '-0.3px',
-            color: 'var(--accent-emerald)'
-          }}>My Active Teams</h2>
-
-          {activeTeams.length === 0 ? (
-            <div className="glass-card" style={{
-              padding: '36px 24px',
-              textAlign: 'center',
-              borderColor: 'rgba(16, 185, 129, 0.15)'
-            }}>
-              <div style={{
-                width: '56px',
-                height: '56px',
-                borderRadius: 'var(--radius-md)',
-                background: 'rgba(16, 185, 129, 0.1)',
-                border: '1px solid rgba(16, 185, 129, 0.2)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                margin: '0 auto 16px auto'
-              }}>
-                <UsersIcon size={24} style={{ color: 'var(--accent-emerald)' }} />
-              </div>
-              <p style={{
-                color: 'var(--text-secondary)',
-                fontSize: '0.9rem',
-                marginBottom: '16px'
-              }}>You haven&apos;t joined any active teams yet.</p>
-              <Link href="/">
-                <button className="btn-ghost" style={{ minHeight: '44px' }}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <Compass size={15} /> Explore Projects
-                  </span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', position: 'sticky', top: '96px', alignSelf: 'start' }}>
+          <div className="card" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div>
+              <h2 className="h2-section" style={{ color: 'var(--text-primary)', marginBottom: '4px', fontSize: '1.1rem', fontWeight: 600 }}>Quick Actions</h2>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <Link href="/post" style={{ width: '100%' }}>
+                <button className="btn-primary" style={{ width: '100%', minHeight: '36px', padding: '8px 16px', borderRadius: 'var(--radius-sm)', fontSize: '0.88rem', color: '#FFFFFF', fontWeight: 'bold' }}>
+                  + Post project
+                </button>
+              </Link>
+              <Link href="/" style={{ width: '100%' }}>
+                <button className="btn-ghost" style={{ width: '100%', minHeight: '36px', padding: '8px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', borderRadius: 'var(--radius-sm)', fontSize: '0.88rem', color: '#FFFFFF', fontWeight: 600, background: 'rgba(120, 140, 255, 0.15)' }}>
+                  <Compass size={14} color="#FFFFFF" /> Explore ideaboard
                 </button>
               </Link>
             </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {activeTeams.map(app => (
-                <div key={app.id} className="glass-card" style={{
-                  padding: '20px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '12px',
-                  borderLeft: '3px solid #10b981'
-                }}>
-                  <div>
-                    <h3 style={{
-                      fontSize: '1.1rem',
-                      fontWeight: 600,
-                      color: 'var(--text-primary)',
-                      margin: 0,
-                      marginBottom: '4px'
-                    }}>{app.projects?.title}</h3>
-                    <p style={{
-                      fontSize: '0.82rem',
-                      color: 'var(--text-secondary)'
-                    }}>Joined {new Date(app.created_at).toLocaleDateString()}</p>
-                  </div>
-                  <Link href={`/projects/${app.projects?.id}`} style={{ width: '100%' }}>
-                    <button className="btn-ghost" style={{
-                      width: '100%',
-                      minHeight: '44px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '6px'
-                    }}>
-                      Go to Project Board <ChevronRight size={15} />
-                    </button>
-                  </Link>
-                </div>
-              ))}
+          </div>
+
+          <div className="card" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div>
+              <h2 className="h2-section" style={{ color: 'var(--text-primary)', marginBottom: '4px', fontSize: '1.1rem', fontWeight: 600 }}>Application Status</h2>
             </div>
-          )}
 
-          <h2 style={{
-            fontSize: '1.4rem',
-            fontWeight: 700,
-            letterSpacing: '-0.3px',
-            color: 'var(--text-primary)',
-            marginTop: '12px'
-          }}>Pending Applications</h2>
-
-          {otherApps.length === 0 ? (
-            <div className="glass-card" style={{ padding: '36px 24px', textAlign: 'center' }}>
-              <div style={{
-                width: '56px',
-                height: '56px',
-                borderRadius: 'var(--radius-md)',
-                background: 'rgba(99, 102, 241, 0.1)',
-                border: '1px solid rgba(99, 102, 241, 0.2)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                margin: '0 auto 16px auto'
-              }}>
-                <Send size={22} style={{ color: 'var(--accent-indigo)' }} />
+            {applicationUpdates.length === 0 ? (
+              <div style={{ padding: '12px 0', textAlign: 'center' }}>
+                <p className="body-text" style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>No applications sent.</p>
               </div>
-              <p style={{
-                color: 'var(--text-secondary)',
-                fontSize: '0.9rem',
-                marginBottom: '16px'
-              }}>No pending applications.</p>
-              <Link href="/">
-                <button className="btn-glow" style={{ minHeight: '44px', padding: '10px 28px' }}>
-                  Explore IdeaBoard
-                </button>
-              </Link>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {otherApps.map(app => (
-                <div key={app.id} className="glass-card" style={{
-                  padding: '18px 20px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: '12px',
-                  flexWrap: 'wrap'
-                }}>
-                  <div style={{ minWidth: 0, flex: 1 }}>
-                    <h3 style={{
-                      fontSize: '1.05rem',
-                      fontWeight: 600,
-                      color: 'var(--text-primary)',
-                      margin: 0,
-                      marginBottom: '4px'
-                    }}>{app.projects?.title}</h3>
-                    <p style={{
-                      fontSize: '0.82rem',
-                      color: 'var(--text-secondary)'
-                    }}>Applied {new Date(app.created_at).toLocaleDateString()}</p>
-                  </div>
-                  <div style={{
-                    padding: '6px 14px',
-                    borderRadius: 'var(--radius-full)',
-                    fontSize: '0.8rem',
-                    fontWeight: 600,
-                    background: app.status === 'Declined' ? 'rgba(248, 113, 113, 0.1)' : 'rgba(99, 102, 241, 0.1)',
-                    color: app.status === 'Declined' ? '#F87171' : '#818CF8',
-                    border: `1px solid ${app.status === 'Declined' ? 'rgba(248, 113, 113, 0.2)' : 'rgba(99, 102, 241, 0.2)'}`,
-                    whiteSpace: 'nowrap' as const
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {applicationUpdates.map(app => (
+                  <div key={app.id} className="card" style={{
+                    padding: '12px 14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '10px',
+                    flexWrap: 'wrap',
+                    borderLeft: app.status === 'Pending' ? '3px solid var(--semantic-warning)' : '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-sm)'
                   }}>
-                    {app.status}
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <h3 className="h3-card" style={{ margin: 0, marginBottom: '2px', fontSize: '0.9rem', fontWeight: 600 }}>{app.projects?.title}</h3>
+                      <p className="meta-text" style={{ fontSize: '0.75rem' }}>Applied {new Date(app.created_at).toLocaleDateString()}</p>
+                    </div>
+                    <div className="status-text" style={{
+                      padding: '4px 10px',
+                      borderRadius: 'var(--radius-sm)',
+                      fontSize: '0.72rem',
+                      ...applicationStatusStyles(app.status),
+                      whiteSpace: 'nowrap'
+                    }}>
+                      {app.status}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
+          </div>
         </div>
-
       </div>
 
-      <style>{`
-        @keyframes pulseGlow {
-          0%, 100% { box-shadow: 0 0 12px rgba(99, 102, 241, 0.4), 0 0 24px rgba(99, 102, 241, 0.2); }
-          50% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.6), 0 0 40px rgba(99, 102, 241, 0.3); }
-        }
-      `}</style>
     </main>
   );
 }

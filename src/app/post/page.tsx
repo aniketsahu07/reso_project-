@@ -90,11 +90,13 @@ export default function PostProject() {
   };
 
   return (
-    <main className="main-content" style={{ maxWidth: '800px', paddingTop: '120px' }}>
-      <h1 style={{ fontSize: '2.5rem', marginBottom: '8px' }}>Post a Project</h1>
-      <p style={{ color: 'var(--text-secondary)', marginBottom: '32px' }}>Fill out the details below to find teammates for your idea.</p>
+    <main className="main-content" style={{ maxWidth: '800px', paddingTop: '88px' }}>
       
-      <form onSubmit={handleSubmit} className="glass-panel" style={{ padding: '40px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      <form onSubmit={handleSubmit} className="panel" style={{ padding: '32px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div style={{ marginBottom: '8px' }}>
+          <h1 style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.5px' }}>Post a Project</h1>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', margin: '4px 0 0' }}>Fill out the details below to find teammates for your idea.</p>
+        </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <label style={{ fontWeight: 500 }}>Project Title</label>
           <input 
@@ -107,7 +109,7 @@ export default function PostProject() {
           />
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <label style={{ fontWeight: 500 }}>Project Type</label>
             <select 
@@ -155,8 +157,9 @@ export default function PostProject() {
           <label style={{ fontWeight: 500 }}>Description</label>
           <textarea 
             required 
+            rows={4}
             className="search-input" 
-            style={{ padding: '12px 16px', minHeight: '120px', resize: 'vertical' }}
+            style={{ padding: '12px 16px', resize: 'vertical' }}
             value={formData.description}
             onChange={(e) => setFormData({...formData, description: e.target.value})}
           />
@@ -165,9 +168,9 @@ export default function PostProject() {
         <div>
           <label style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', fontWeight: 500 }}>
             <span>Project Skills (Click to toggle: Required <span style={{color:'var(--text-secondary)'}}>→</span> Nice-to-Have <span style={{color:'var(--text-secondary)'}}>→</span> Remove)</span>
-            <span style={{ color: Object.keys(skills).length === 15 ? '#F87171' : 'var(--text-secondary)' }}>{Object.keys(skills).length} / 15</span>
+            <span style={{ color: Object.keys(skills).length === 15 ? 'var(--semantic-error)' : 'var(--text-secondary)' }}>{Object.keys(skills).length} / 15</span>
           </label>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '12px' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '8px' }}>
             {PREDEFINED_SKILLS.map(skill => {
               const state = skills[skill];
               const isDisabled = !state && Object.keys(skills).length >= 15;
@@ -177,13 +180,13 @@ export default function PostProject() {
               let color = isDisabled ? 'var(--text-secondary)' : 'var(--text-primary)';
               
               if (state === 'required') {
-                border = '1px solid #818CF8';
-                bg = 'rgba(99, 102, 241, 0.15)';
-                color = '#818CF8';
+                border = '1px solid var(--semantic-primary-border)';
+                bg = 'var(--semantic-primary-bg)';
+                color = 'var(--semantic-primary)';
               } else if (state === 'nice') {
-                border = '1px dashed #A78BFA';
-                bg = 'rgba(167, 139, 250, 0.08)';
-                color = '#A78BFA';
+                border = '1px dashed var(--semantic-neutral-border)';
+                bg = 'var(--semantic-neutral-bg)';
+                color = 'var(--semantic-neutral)';
               }
 
               return (
@@ -193,9 +196,9 @@ export default function PostProject() {
                   onClick={() => toggleSkill(skill)}
                   disabled={isDisabled}
                   style={{
-                    padding: '8px 16px',
-                    borderRadius: '20px',
-                    fontSize: '0.85rem',
+                    padding: '4px 10px',
+                    borderRadius: 'var(--radius-sm)',
+                    fontSize: '13px',
                     fontWeight: 500,
                     cursor: isDisabled ? 'not-allowed' : 'pointer',
                     border,
@@ -211,7 +214,7 @@ export default function PostProject() {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <label style={{ fontWeight: 500 }}>Commitment Level</label>
             <input 
@@ -236,9 +239,11 @@ export default function PostProject() {
           </div>
         </div>
 
-        <button type="submit" disabled={loading} className="btn-primary" style={{ marginTop: '16px', padding: '14px', fontSize: '1.05rem' }}>
-          {loading ? 'Posting...' : 'Post Project'}
-        </button>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px' }}>
+          <button type="submit" disabled={loading} className="btn-primary" style={{ padding: '10px 24px', fontSize: '0.95rem', width: 'auto' }}>
+            {loading ? 'Posting...' : 'Post Project'}
+          </button>
+        </div>
       </form>
     </main>
   );
