@@ -230,7 +230,9 @@ export default function TeamChat({ params }: { params: { id: string } }) {
                 type="submit"
                 disabled={sending || !newMessage.trim()}
                 className="btn-primary"
-                style={{ borderRadius: '50%', width: '40px', height: '40px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                style={{ borderRadius: '50%', width: '40px', height: '40px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#4F46E5' }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = '#4338CA'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = '#4F46E5'; }}
               >
                 <Send size={16} />
               </button>

@@ -255,7 +255,7 @@ export default function ProjectDetail({ params }: { params: { id: string } }) {
         <div className="bento-item bento-header" style={{ padding: '24px', border: '1px solid var(--border-subtle)' }}>
           <div style={{ position: 'relative', zIndex: 1 }}>
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '12px' }}>
-              <span className="badge badge-primary label-text" style={{ padding: '4px 10px', fontSize: '0.72rem', textTransform: 'none' }}>{project.type} · {project.stage}</span>
+              <span className={`badge ${project.type === 'AI/ML' ? 'badge-success' : (project.type === 'Web App' || project.type === 'WEB APP' ? 'badge-warning' : 'badge-primary')} label-text`} style={{ padding: '4px 10px', fontSize: '0.72rem', textTransform: 'none' }}>{project.type} · {project.stage}</span>
             </div>
 
             <h1 className="h1-page" style={{ margin: '0 0 16px 0', fontSize: '1.8rem', fontWeight: 700 }}>

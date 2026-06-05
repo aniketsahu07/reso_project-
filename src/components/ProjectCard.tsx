@@ -19,16 +19,16 @@ export default function ProjectCard({ project }: { project: any }) {
             fontWeight: 600,
             letterSpacing: '1.4px',
             textTransform: 'uppercase',
-            color: '#5b7cff'
+            color: project.type === 'AI/ML' ? '#22C55E' : (project.type === 'Web App' || project.type === 'WEB APP' ? '#EA580C' : '#4F46E5')
           }}>
             {project.type}
           </span>
           <img
-            src={project.founderAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(project.founder || 'User')}&background=10182f&color=5b7cff`}
+            src={project.founderAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(project.founder || 'User')}&background=1a1a1a&color=4f46e5`}
             alt={project.founder}
             style={{
               width: '30px', height: '30px', borderRadius: '50%',
-              border: '1.5px solid rgba(120,140,255,0.22)',
+              border: '1.5px solid #2a2a2a',
               flexShrink: 0
             }}
           />
@@ -85,14 +85,12 @@ export default function ProjectCard({ project }: { project: any }) {
             return (
               <span
                 key={skill}
+                className={isMatch ? "skill-badge match" : "skill-badge"}
                 style={{
                   padding: '3px 8px',
                   borderRadius: '6px',
                   fontSize: '0.72rem',
                   fontWeight: 500,
-                  background: isMatch ? 'rgba(34,197,94,0.12)' : 'rgba(120,140,255,0.08)',
-                  border: `1px solid ${isMatch ? 'rgba(34,197,94,0.25)' : 'rgba(120,140,255,0.15)'}`,
-                  color: isMatch ? '#22c55e' : '#94a3b8',
                   whiteSpace: 'nowrap'
                 }}
               >
@@ -120,7 +118,7 @@ export default function ProjectCard({ project }: { project: any }) {
         justifyContent: 'space-between',
         alignItems: 'center',
         padding: '11px 22px',
-        borderTop: '1px solid rgba(120,140,255,0.1)',
+        borderTop: '1px solid #2a2a2a',
         background: 'rgba(255,255,255,0.015)'
       }}>
         <div style={{

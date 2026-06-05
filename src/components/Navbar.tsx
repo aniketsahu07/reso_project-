@@ -97,7 +97,7 @@ export default function Navbar() {
   return (
     <nav className="navbar">
       <Link href="/" className="nav-brand" onClick={closeMenu}>
-        <div className="brand-icon" style={{ background: 'linear-gradient(135deg, #5b7cff 0%, #8b5cf6 100%)' }}>
+        <div className="brand-icon" style={{ background: 'linear-gradient(135deg, #4F46E5 0%, #4338CA 100%)' }}>
           <Zap size={18} />
         </div>
         <span style={{ color: '#f8fafc', fontWeight: 700, letterSpacing: '-0.3px' }}>ProjectHub</span>

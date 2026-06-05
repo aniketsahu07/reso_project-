@@ -221,9 +221,9 @@ export default function ChatHub() {
                       alignItems: 'center',
                       justifyContent: 'space-between',
                       cursor: 'pointer',
-                      borderColor: isSelected ? 'var(--semantic-primary)' : 'var(--border-color)',
-                      background: isSelected ? 'var(--bg-card-hover)' : 'var(--bg-surface)',
-                      borderLeft: project.unreadCount > 0 ? '3px solid var(--semantic-primary)' : (isSelected ? '3px solid var(--semantic-primary)' : '1px solid var(--border-color)')
+                      borderColor: isSelected ? '#4F46E5' : 'var(--border-color)',
+                      background: isSelected ? 'rgba(79, 70, 229, 0.15)' : 'var(--bg-surface)',
+                      borderLeft: isSelected ? '2px solid #4F46E5' : (project.unreadCount > 0 ? '3px solid var(--semantic-primary)' : '1px solid var(--border-color)')
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>

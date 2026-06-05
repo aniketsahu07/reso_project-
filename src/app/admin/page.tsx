@@ -9,7 +9,7 @@ import { useAuth } from '../../components/AuthProvider';
 const projectStatusBadgeClass = (status: string) => {
   switch (status) {
     case 'Open':
-      return 'badge badge-primary';
+      return 'badge badge-success';
     case 'Active':
       return 'badge badge-success';
     case 'Completed':
@@ -277,7 +277,13 @@ export default function AdminDashboard() {
                 <tr key={p.id} style={{ borderBottom: '1px solid var(--border-subtle)', transition: 'background 0.2s ease' }} onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-surface-hover)'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
                   <td className="body-text text-bold" style={{ padding: '12px 10px', color: 'var(--text-primary)' }}>{p.title}</td>
                   <td style={{ padding: '12px 10px' }}>
-                    <span className="badge badge-primary label-text" style={{ padding: '4px 10px' }}>{p.type}</span>
+                    <span className={
+                      p.type === 'AI/ML'
+                        ? 'badge badge-success label-text'
+                        : (p.type === 'Web App' || p.type === 'WEB APP')
+                          ? 'badge badge-warning label-text'
+                          : 'badge badge-primary label-text'
+                    } style={{ padding: '4px 10px' }}>{p.type}</span>
                   </td>
                   <td style={{ padding: '12px 10px' }}>
                     <span className={projectStatusBadgeClass(p.status)} style={{ padding: '4px 10px' }}>{p.status || 'Unknown'}</span>

@@ -102,9 +102,9 @@ export default function SkillMatchPage() {
   }, [user, authLoading, router]);
 
   const getMatchColor = (score: number) => {
-    if (score >= 80) return { bg: 'var(--semantic-success-bg)', text: 'var(--semantic-success)', border: 'var(--semantic-success-border)', fg: 'var(--semantic-success-fg)', solid: 'var(--semantic-success-solid)' };
-    if (score >= 60) return { bg: 'var(--semantic-primary-bg)', text: 'var(--semantic-primary)', border: 'var(--semantic-primary-border)', fg: 'var(--semantic-primary-fg)', solid: 'var(--semantic-primary-solid)' };
-    return { bg: 'var(--semantic-warning-bg)', text: 'var(--semantic-warning)', border: 'var(--semantic-warning-border)', fg: 'var(--semantic-warning-fg)', solid: 'var(--semantic-warning-solid)' };
+    if (score >= 60) return { bg: 'rgba(34, 197, 94, 0.12)', text: '#22C55E', border: 'rgba(34, 197, 94, 0.28)', fg: '#ffffff', solid: '#22C55E' };
+    if (score >= 40) return { bg: 'rgba(234, 88, 12, 0.12)', text: '#EA580C', border: 'rgba(234, 88, 12, 0.28)', fg: '#ffffff', solid: '#EA580C' };
+    return { bg: '#2a2a2a', text: '#9ca3af', border: '#333333', fg: '#f1f1f1', solid: '#2a2a2a', cardBg: '#2a2a2a' };
   };
 
   return (
@@ -245,7 +245,8 @@ export default function SkillMatchPage() {
                     transition: 'border-color 0.2s ease',
                     position: 'relative',
                     overflow: 'hidden',
-                    cursor: 'default'
+                    cursor: 'default',
+                    background: styles.cardBg || 'var(--bg-card)'
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.borderColor = styles.text;

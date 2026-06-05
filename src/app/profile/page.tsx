@@ -389,9 +389,8 @@ export default function Profile() {
             <h3 className="h3-card" style={{ marginBottom: 0, fontSize: '0.9rem', fontWeight: 600 }}>Technical Arsenal</h3>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
               {skills.length > 0 ? skills.map((s: any) => (
-                <span key={s.skill_name || s} className="badge badge-primary label-text" style={{
+                <span key={s.skill_name || s} className="skill-badge" style={{
                   padding: '4px 8px',
-                  background: 'var(--semantic-primary-bg)', border: '1px solid var(--semantic-primary-border)',
                   fontSize: '0.72rem', textTransform: 'none'
                 }}>
                   {s.skill_name || s}

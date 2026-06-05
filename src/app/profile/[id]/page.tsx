@@ -185,7 +185,13 @@ export default function PublicProfile({ params }: { params: { id: string } }) {
                 {activeProjects.map((proj, idx) => (
                   <Link href={`/projects/${proj.id}`} key={idx}>
                     <div className="card project-card" style={{ borderLeftColor: 'var(--semantic-success)' }}>
-                      <div className="label-text" style={{ color: 'var(--semantic-primary)', marginBottom: '4px', fontSize: '0.68rem', textTransform: 'none' }}>{proj.type}</div>
+                      <div className={
+                        proj.type === 'AI/ML'
+                          ? 'badge badge-success label-text'
+                          : (proj.type === 'Web App' || proj.type === 'WEB APP')
+                            ? 'badge badge-warning label-text'
+                            : 'badge badge-primary label-text'
+                      } style={{ marginBottom: '4px', fontSize: '0.68rem', textTransform: 'none', padding: '4px 10px' }}>{proj.type}</div>
                       <h3 className="h3-card" style={{ marginBottom: '6px', fontSize: '0.98rem', fontWeight: 600 }}>{proj.title}</h3>
                       <p className="body-text" style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.4 }}>{truncateText(proj.description, 120)}</p>
                     </div>
@@ -204,7 +210,13 @@ export default function PublicProfile({ params }: { params: { id: string } }) {
                 {completedProjects.map((proj, idx) => (
                   <Link href={`/projects/${proj.id}`} key={idx}>
                     <div className="card project-card" style={{ borderLeftColor: 'var(--semantic-primary)' }}>
-                      <div className="label-text" style={{ color: 'var(--semantic-primary)', marginBottom: '4px', fontSize: '0.68rem', textTransform: 'none' }}>{proj.type}</div>
+                      <div className={
+                        proj.type === 'AI/ML'
+                          ? 'badge badge-success label-text'
+                          : (proj.type === 'Web App' || proj.type === 'WEB APP')
+                            ? 'badge badge-warning label-text'
+                            : 'badge badge-primary label-text'
+                      } style={{ marginBottom: '4px', fontSize: '0.68rem', textTransform: 'none', padding: '4px 10px' }}>{proj.type}</div>
                       <h3 className="h3-card" style={{ marginBottom: '6px', fontSize: '0.98rem', fontWeight: 600 }}>{proj.title}</h3>
                       <p className="body-text" style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.4 }}>{truncateText(proj.description, 120)}</p>
                     </div>

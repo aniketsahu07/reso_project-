@@ -22,7 +22,7 @@ const HeroSection = ({ onExplore, onHowItWorks }: { onExplore: () => void; onHow
         marginBottom: '28px'
       }}>
         <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#22c55e', flexShrink: 0 }} />
-        <span style={{ fontSize: '0.82rem', color: '#5b7cff', fontWeight: 600, letterSpacing: '0.02em' }}>
+        <span style={{ fontSize: '0.82rem', color: '#4F46E5', fontWeight: 600, letterSpacing: '0.02em' }}>
           Student Collaboration Platform · MMMUT
         </span>
       </div>
@@ -38,7 +38,7 @@ const HeroSection = ({ onExplore, onHowItWorks }: { onExplore: () => void; onHow
       }}>
         Find your people.<br />
         <span style={{
-          background: 'linear-gradient(135deg, #5b7cff 0%, #8b5cf6 100%)',
+          background: 'linear-gradient(135deg, #4F46E5 0%, #4338CA 100%)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           backgroundClip: 'text'
@@ -99,7 +99,7 @@ const HeroSection = ({ onExplore, onHowItWorks }: { onExplore: () => void; onHow
         position: 'absolute',
         width: '420px',
         height: '420px',
-        background: 'radial-gradient(circle, rgba(139, 92, 246, 0.18) 0%, transparent 70%)',
+        background: 'radial-gradient(circle, rgba(79, 70, 229, 0.18) 0%, transparent 70%)',
         filter: 'blur(50px)',
         borderRadius: '50%',
         zIndex: 0,
@@ -114,56 +114,56 @@ const HeroSection = ({ onExplore, onHowItWorks }: { onExplore: () => void; onHow
           {/* Definitions for Gradients */}
           <defs>
             <linearGradient id="hubGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#7c3aed" />
-              <stop offset="100%" stopColor="#4f46e5" />
+              <stop offset="0%" stopColor="#4F46E5" />
+              <stop offset="100%" stopColor="#4338CA" />
             </linearGradient>
             <linearGradient id="skillGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#4338ca" />
-              <stop offset="100%" stopColor="#6d28d9" />
+              <stop offset="0%" stopColor="#4338CA" />
+              <stop offset="100%" stopColor="#312E81" />
             </linearGradient>
           </defs>
 
           {/* Connection Lines & Traveling Dots */}
           <g className="network-lines">
             {/* Solidity */}
-            <line x1="250" y1="250" x2="250" y2="80" stroke="rgba(139,92,246,0.35)" strokeWidth="1.5" strokeDasharray="6 4" />
-            <circle r="3" fill="#a78bfa">
+            <line x1="250" y1="250" x2="250" y2="80" stroke="rgba(79,70,229,0.35)" strokeWidth="1.5" strokeDasharray="6 4" />
+            <circle r="3" fill="#818CF8">
               <animateMotion path="M 250 250 L 250 80" dur="2s" repeatCount="indefinite" />
             </circle>
 
             {/* Flutter */}
-            <line x1="250" y1="250" x2="382" y2="132" stroke="rgba(139,92,246,0.35)" strokeWidth="1.5" strokeDasharray="6 4" />
-            <circle r="3" fill="#a78bfa">
+            <line x1="250" y1="250" x2="382" y2="132" stroke="rgba(79,70,229,0.35)" strokeWidth="1.5" strokeDasharray="6 4" />
+            <circle r="3" fill="#818CF8">
               <animateMotion path="M 250 250 L 382 132" dur="2.4s" repeatCount="indefinite" />
             </circle>
 
             {/* Python */}
-            <line x1="250" y1="250" x2="420" y2="283" stroke="rgba(139,92,246,0.35)" strokeWidth="1.5" strokeDasharray="6 4" />
-            <circle r="3" fill="#a78bfa">
+            <line x1="250" y1="250" x2="420" y2="283" stroke="rgba(79,70,229,0.35)" strokeWidth="1.5" strokeDasharray="6 4" />
+            <circle r="3" fill="#818CF8">
               <animateMotion path="M 250 250 L 420 283" dur="2.8s" repeatCount="indefinite" />
             </circle>
 
             {/* Figma */}
-            <line x1="250" y1="250" x2="335" y2="408" stroke="rgba(139,92,246,0.35)" strokeWidth="1.5" strokeDasharray="6 4" />
-            <circle r="3" fill="#a78bfa">
+            <line x1="250" y1="250" x2="335" y2="408" stroke="rgba(79,70,229,0.35)" strokeWidth="1.5" strokeDasharray="6 4" />
+            <circle r="3" fill="#818CF8">
               <animateMotion path="M 250 250 L 335 408" dur="3.2s" repeatCount="indefinite" />
             </circle>
 
             {/* Node.js */}
-            <line x1="250" y1="250" x2="132" y2="415" stroke="rgba(139,92,246,0.35)" strokeWidth="1.5" strokeDasharray="6 4" />
-            <circle r="3" fill="#a78bfa">
+            <line x1="250" y1="250" x2="132" y2="415" stroke="rgba(79,70,229,0.35)" strokeWidth="1.5" strokeDasharray="6 4" />
+            <circle r="3" fill="#818CF8">
               <animateMotion path="M 250 250 L 132 415" dur="3.6s" repeatCount="indefinite" />
             </circle>
 
             {/* UI/UX */}
-            <line x1="250" y1="250" x2="72" y2="265" stroke="rgba(139,92,246,0.35)" strokeWidth="1.5" strokeDasharray="6 4" />
-            <circle r="3" fill="#a78bfa">
+            <line x1="250" y1="250" x2="72" y2="265" stroke="rgba(79,70,229,0.35)" strokeWidth="1.5" strokeDasharray="6 4" />
+            <circle r="3" fill="#818CF8">
               <animateMotion path="M 250 250 L 72 265" dur="4s" repeatCount="indefinite" />
             </circle>
 
             {/* ML */}
-            <line x1="250" y1="250" x2="118" y2="118" stroke="rgba(139,92,246,0.35)" strokeWidth="1.5" strokeDasharray="6 4" />
-            <circle r="3" fill="#a78bfa">
+            <line x1="250" y1="250" x2="118" y2="118" stroke="rgba(79,70,229,0.35)" strokeWidth="1.5" strokeDasharray="6 4" />
+            <circle r="3" fill="#818CF8">
               <animateMotion path="M 250 250 L 118 118" dur="4.4s" repeatCount="indefinite" />
             </circle>
           </g>
@@ -171,7 +171,7 @@ const HeroSection = ({ onExplore, onHowItWorks }: { onExplore: () => void; onHow
           {/* Student Nodes */}
           {/* Node 1: Solidity */}
           <g className="node-g" style={{ animation: 'float1 5.2s ease-in-out infinite' }}>
-            <circle cx="250" cy="80" r="16" fill="url(#skillGrad)" style={{ filter: 'drop-shadow(0 0 8px rgba(139,92,246,0.7))' }} />
+            <circle cx="250" cy="80" r="16" fill="url(#skillGrad)" style={{ filter: 'drop-shadow(0 0 8px rgba(79,70,229,0.7))' }} />
             {/* Person avatar icon */}
             <circle cx="250" cy="76.5" r="3.5" fill="#ffffff" opacity="0.9" />
             <path d="M 244 86.5 A 6 6 0 0 1 256 86.5" stroke="#ffffff" strokeWidth="1.5" fill="none" opacity="0.9" />
@@ -180,7 +180,7 @@ const HeroSection = ({ onExplore, onHowItWorks }: { onExplore: () => void; onHow
 
           {/* Node 2: Flutter */}
           <g className="node-g" style={{ animation: 'float2 6.4s ease-in-out infinite' }}>
-            <circle cx="382" cy="132" r="16" fill="url(#skillGrad)" style={{ filter: 'drop-shadow(0 0 8px rgba(139,92,246,0.7))' }} />
+            <circle cx="382" cy="132" r="16" fill="url(#skillGrad)" style={{ filter: 'drop-shadow(0 0 8px rgba(79,70,229,0.7))' }} />
             {/* Person avatar icon */}
             <circle cx="382" cy="128.5" r="3.5" fill="#ffffff" opacity="0.9" />
             <path d="M 376 138.5 A 6 6 0 0 1 388 138.5" stroke="#ffffff" strokeWidth="1.5" fill="none" opacity="0.9" />
@@ -189,7 +189,7 @@ const HeroSection = ({ onExplore, onHowItWorks }: { onExplore: () => void; onHow
 
           {/* Node 3: Python */}
           <g className="node-g" style={{ animation: 'float3 7.1s ease-in-out infinite' }}>
-            <circle cx="420" cy="283" r="16" fill="url(#skillGrad)" style={{ filter: 'drop-shadow(0 0 8px rgba(139,92,246,0.7))' }} />
+            <circle cx="420" cy="283" r="16" fill="url(#skillGrad)" style={{ filter: 'drop-shadow(0 0 8px rgba(79,70,229,0.7))' }} />
             {/* Person avatar icon */}
             <circle cx="420" cy="279.5" r="3.5" fill="#ffffff" opacity="0.9" />
             <path d="M 414 289.5 A 6 6 0 0 1 426 289.5" stroke="#ffffff" strokeWidth="1.5" fill="none" opacity="0.9" />
@@ -198,7 +198,7 @@ const HeroSection = ({ onExplore, onHowItWorks }: { onExplore: () => void; onHow
 
           {/* Node 4: Figma */}
           <g className="node-g" style={{ animation: 'float4 8.3s ease-in-out infinite' }}>
-            <circle cx="335" cy="408" r="16" fill="url(#skillGrad)" style={{ filter: 'drop-shadow(0 0 8px rgba(139,92,246,0.7))' }} />
+            <circle cx="335" cy="408" r="16" fill="url(#skillGrad)" style={{ filter: 'drop-shadow(0 0 8px rgba(79,70,229,0.7))' }} />
             {/* Person avatar icon */}
             <circle cx="335" cy="404.5" r="3.5" fill="#ffffff" opacity="0.9" />
             <path d="M 329 414.5 A 6 6 0 0 1 341 414.5" stroke="#ffffff" strokeWidth="1.5" fill="none" opacity="0.9" />
@@ -207,7 +207,7 @@ const HeroSection = ({ onExplore, onHowItWorks }: { onExplore: () => void; onHow
 
           {/* Node 5: Node.js */}
           <g className="node-g" style={{ animation: 'float5 5.8s ease-in-out infinite' }}>
-            <circle cx="132" cy="415" r="16" fill="url(#skillGrad)" style={{ filter: 'drop-shadow(0 0 8px rgba(139,92,246,0.7))' }} />
+            <circle cx="132" cy="415" r="16" fill="url(#skillGrad)" style={{ filter: 'drop-shadow(0 0 8px rgba(79,70,229,0.7))' }} />
             {/* Person avatar icon */}
             <circle cx="132" cy="411.5" r="3.5" fill="#ffffff" opacity="0.9" />
             <path d="M 126 421.5 A 6 6 0 0 1 138 421.5" stroke="#ffffff" strokeWidth="1.5" fill="none" opacity="0.9" />
@@ -216,7 +216,7 @@ const HeroSection = ({ onExplore, onHowItWorks }: { onExplore: () => void; onHow
 
           {/* Node 6: UI/UX */}
           <g className="node-g" style={{ animation: 'float6 6.9s ease-in-out infinite' }}>
-            <circle cx="72" cy="265" r="16" fill="url(#skillGrad)" style={{ filter: 'drop-shadow(0 0 8px rgba(139,92,246,0.7))' }} />
+            <circle cx="72" cy="265" r="16" fill="url(#skillGrad)" style={{ filter: 'drop-shadow(0 0 8px rgba(79,70,229,0.7))' }} />
             {/* Person avatar icon */}
             <circle cx="72" cy="261.5" r="3.5" fill="#ffffff" opacity="0.9" />
             <path d="M 66 271.5 A 6 6 0 0 1 78 271.5" stroke="#ffffff" strokeWidth="1.5" fill="none" opacity="0.9" />
@@ -225,7 +225,7 @@ const HeroSection = ({ onExplore, onHowItWorks }: { onExplore: () => void; onHow
 
           {/* Node 7: ML */}
           <g className="node-g" style={{ animation: 'float7 7.7s ease-in-out infinite' }}>
-            <circle cx="118" cy="118" r="16" fill="url(#skillGrad)" style={{ filter: 'drop-shadow(0 0 8px rgba(139,92,246,0.7))' }} />
+            <circle cx="118" cy="118" r="16" fill="url(#skillGrad)" style={{ filter: 'drop-shadow(0 0 8px rgba(79,70,229,0.7))' }} />
             {/* Person avatar icon */}
             <circle cx="118" cy="114.5" r="3.5" fill="#ffffff" opacity="0.9" />
             <path d="M 112 124.5 A 6 6 0 0 1 124 124.5" stroke="#ffffff" strokeWidth="1.5" fill="none" opacity="0.9" />
@@ -234,7 +234,7 @@ const HeroSection = ({ onExplore, onHowItWorks }: { onExplore: () => void; onHow
 
           {/* Central Platform Hub */}
           <g className="hub-g">
-            <circle cx="250" cy="250" r="28" fill="url(#hubGrad)" style={{ filter: 'drop-shadow(0 0 12px rgba(139,92,246,0.9))' }} />
+            <circle cx="250" cy="250" r="28" fill="url(#hubGrad)" style={{ filter: 'drop-shadow(0 0 12px rgba(79,70,229,0.9))' }} />
             {/* ProjectHub lightning bolt icon as centered text */}
             <text x="250" y="257" textAnchor="middle" fontSize="20px" fill="#ffffff" style={{ fontWeight: 'bold' }}>⚡</text>
           </g>
@@ -281,8 +281,8 @@ const HowItWorksSection = () => (
         <div key={i} className="step-card" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <div style={{
             width: '46px', height: '46px', borderRadius: '10px',
-            background: step.accent ? 'rgba(139,92,246,0.14)' : 'rgba(91,124,255,0.12)',
-            color: step.accent ? '#8b5cf6' : '#5b7cff',
+            background: '#4338CA',
+            color: '#ffffff',
             display: 'flex', alignItems: 'center', justifyContent: 'center'
           }}>
             {step.icon}
@@ -376,7 +376,7 @@ export default function Home() {
             teamSize: p.team_size,
             stage: p.stage,
             founder: p.users?.full_name || 'Anonymous',
-            founderAvatar: p.users?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.users?.full_name || 'Anonymous')}&background=10182f&color=5b7cff`,
+            founderAvatar: p.users?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.users?.full_name || 'Anonymous')}&background=1a1a1a&color=4f46e5`,
             skillsRequired: reqSkills,
             skillsNice: niceSkills,
             matchedSkills: matchedSkills,
@@ -524,9 +524,9 @@ export default function Home() {
           <div className="card p-4 flex-col flex-center text-center mt-4" style={{ gap: '16px', padding: '56px 32px' }}>
             <div style={{
               width: '72px', height: '72px', borderRadius: '14px',
-              background: 'rgba(91,124,255,0.12)',
+              background: 'rgba(79, 70, 229, 0.12)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: '#5b7cff'
+              color: '#4F46E5'
             }}>
               <Code size={32} />
             </div>

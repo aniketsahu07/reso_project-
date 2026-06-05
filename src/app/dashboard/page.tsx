@@ -9,10 +9,10 @@ import { useAuth } from '../../components/AuthProvider';
 
 const statusBadgeClass = (status: string) => {
   switch (status) {
-    case 'Open': return 'badge badge-primary';
+    case 'Open': return 'badge badge-success';
     case 'Active': return 'badge badge-success';
     case 'Completed': return 'badge badge-success';
-    default: return 'badge badge-primary';
+    default: return 'badge badge-success';
   }
 };
 
@@ -146,9 +146,9 @@ export default function Dashboard() {
           display: 'flex', 
           flexDirection: 'column', 
           gap: '6px', 
-          background: '#1e2a3a',
-          border: '1px solid #334155',
-          borderLeft: '4px solid #5b7cff' 
+          background: '#1a1a1a',
+          border: '1px solid #2a2a2a',
+          borderLeft: '4px solid #4F46E5' 
         }}>
           <div style={{ fontSize: '0.875rem', color: '#E2E8F0', fontWeight: 600 }}>Projects Led</div>
           <div style={{ fontSize: '2rem', fontWeight: 800, color: '#FFFFFF', lineHeight: 1 }}>{myProjects.length}</div>
@@ -159,9 +159,9 @@ export default function Dashboard() {
           display: 'flex', 
           flexDirection: 'column', 
           gap: '6px', 
-          background: '#1e2a3a',
-          border: '1px solid #334155',
-          borderLeft: '4px solid #22c55e' 
+          background: '#1a1a1a',
+          border: '1px solid #2a2a2a',
+          borderLeft: '4px solid #22C55E' 
         }}>
           <div style={{ fontSize: '0.875rem', color: '#E2E8F0', fontWeight: 600 }}>Teams Joined</div>
           <div style={{ fontSize: '2rem', fontWeight: 800, color: '#FFFFFF', lineHeight: 1 }}>{activeTeams.length}</div>
@@ -172,9 +172,9 @@ export default function Dashboard() {
           display: 'flex', 
           flexDirection: 'column', 
           gap: '6px', 
-          background: '#1e2a3a',
-          border: '1px solid #334155',
-          borderLeft: '4px solid #f59e0b' 
+          background: '#1a1a1a',
+          border: '1px solid #2a2a2a',
+          borderLeft: '4px solid #EA580C' 
         }}>
           <div style={{ fontSize: '0.875rem', color: '#E2E8F0', fontWeight: 600 }}>Pending Reviews</div>
           <div style={{ fontSize: '2rem', fontWeight: 800, color: '#FFFFFF', lineHeight: 1 }}>{pendingApplications.length}</div>
@@ -326,7 +326,7 @@ export default function Dashboard() {
                 </button>
               </Link>
               <Link href="/" style={{ width: '100%' }}>
-                <button className="btn-ghost" style={{ width: '100%', minHeight: '36px', padding: '8px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', borderRadius: 'var(--radius-sm)', fontSize: '0.88rem', color: '#FFFFFF', fontWeight: 600, background: 'rgba(120, 140, 255, 0.15)' }}>
+                <button className="btn-ghost" style={{ width: '100%', minHeight: '36px', padding: '8px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', borderRadius: 'var(--radius-sm)', fontSize: '0.88rem', color: '#FFFFFF', fontWeight: 600, background: '#2a2a2a', border: '1px solid #333333' }}>
                   <Compass size={14} color="#FFFFFF" /> Explore ideaboard
                 </button>
               </Link>
