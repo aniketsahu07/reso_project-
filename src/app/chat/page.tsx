@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../components/AuthProvider';
@@ -18,6 +18,85 @@ export default function ChatHub() {
   const [previewMessages, setPreviewMessages] = useState<any[]>([]);
   const [previewMembers, setPreviewMembers] = useState<any[]>([]);
   const [previewLoading, setPreviewLoading] = useState(false);
+
+  const selectedProjectIdRef = useRef(selectedProjectId);
+  const activeProjectsRef = useRef(activeProjects);
+
+  useEffect(() => {
+    selectedProjectIdRef.current = selectedProjectId;
+  }, [selectedProjectId]);
+
+  useEffect(() => {
+    activeProjectsRef.current = activeProjects;
+  }, [activeProjects]);
+
+  const handleSelectProject = async (projectId: string) => {
+    setSelectedProjectId(projectId);
+    setActiveProjects(prev => prev.map(p => p.id === projectId ? { ...p, unreadCount: 0 } : p));
+    if (user) {
+      await supabase.from('chat_read_receipts').upsert({
+        user_id: user.id,
+        project_id: projectId,
+        last_read_at: new Date().toISOString()
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('chat_directory_realtime')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'messages' },
+        async (payload) => {
+          const newMsg = payload.new;
+          const currentSelectedId = selectedProjectIdRef.current;
+          const currentProjects = activeProjectsRef.current;
+
+          const projectBelongs = currentProjects.some(p => p.id === newMsg.project_id);
+          if (!projectBelongs) return;
+
+          if (newMsg.project_id === currentSelectedId) {
+            await supabase.from('chat_read_receipts').upsert({
+              user_id: user.id,
+              project_id: newMsg.project_id,
+              last_read_at: new Date().toISOString()
+            });
+
+            const { data: fullMsg } = await supabase
+              .from('messages')
+              .select(`
+                id, content, created_at, user_id,
+                users!messages_user_id_fkey ( full_name, avatar_url )
+              `)
+              .eq('id', newMsg.id)
+              .single();
+
+            if (fullMsg) {
+              setPreviewMessages(prev => {
+                if (prev.some(m => m.id === fullMsg.id)) return prev;
+                return [...prev, fullMsg];
+              });
+            }
+          } else {
+            setActiveProjects(prev =>
+              prev.map(p =>
+                p.id === newMsg.project_id
+                  ? { ...p, unreadCount: (p.unreadCount || 0) + 1 }
+                  : p
+              )
+            );
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
 
   useEffect(() => {
     async function loadChats() {
@@ -79,7 +158,14 @@ export default function ChatHub() {
         }
 
         // Set first project as active
-        setSelectedProjectId(allProjects[0].id);
+        const firstProjId = allProjects[0].id;
+        setSelectedProjectId(firstProjId);
+        allProjects[0].unreadCount = 0;
+        await supabase.from('chat_read_receipts').upsert({
+          user_id: user.id,
+          project_id: firstProjId,
+          last_read_at: new Date().toISOString()
+        });
       }
 
       setActiveProjects(allProjects);
@@ -154,7 +240,7 @@ export default function ChatHub() {
   const columnHeight = 'calc(100vh - 180px)';
 
   return (
-    <main className="main-content" style={{ maxWidth: '1200px', paddingTop: '88px', paddingBottom: '24px', height: 'calc(100vh - 64px)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+    <main className="main-content" style={{ maxWidth: 'min(1400px, 90vw)', paddingTop: '88px', paddingBottom: '24px', height: 'calc(100vh - 64px)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
       <div style={{ marginBottom: '12px' }}>
         <h1 className="h1-page" style={{ marginBottom: '2px', fontSize: '1.5rem', fontWeight: 600 }}>Team Chats</h1>
         <p className="body-text" style={{ color: 'var(--text-secondary)', fontSize: '0.88rem' }}>Collaborate with your student teams in real-time.</p>
@@ -169,16 +255,13 @@ export default function ChatHub() {
           </Link>
         </div>
       ) : (
-        <div style={{ display: 'flex', gap: '16px', flex: 1, overflow: 'hidden', minHeight: 0 }}>
+        <div className="chat-container-grid">
 
-          {/* Left Column (40% width): Side-by-side Team status sidebar + Chat directory */}
-          <div style={{ width: '40%', display: 'flex', gap: '16px', minHeight: 0 }}>
-
-            {/* Team Members Status Sidebar */}
-            <div className="panel" style={{ width: '180px', height: columnHeight, padding: '12px', display: 'flex', flexDirection: 'column', overflowY: 'auto', flexShrink: 0 }}>
-              <h3 className="label-text" style={{ fontSize: '0.72rem', color: 'var(--text-dim)', borderBottom: '1px solid var(--border-color)', paddingBottom: '6px', marginBottom: '12px' }}>
-                Team Status
-              </h3>
+          {/* Team Members Status Sidebar */}
+          <div className="panel" style={{ height: columnHeight, padding: '12px', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+            <h3 className="label-text" style={{ fontSize: '0.72rem', color: 'var(--text-dim)', borderBottom: '1px solid var(--border-color)', paddingBottom: '6px', marginBottom: '12px' }}>
+              Team Status
+            </h3>
               {selectedProjectId ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {previewMembers.map((member, idx) => (
@@ -206,14 +289,14 @@ export default function ChatHub() {
               )}
             </div>
 
-            {/* Chat directory list (alongside the status sidebar) */}
-            <div style={{ flex: 1, height: columnHeight, display: 'flex', flexDirection: 'column', gap: '10px', overflowY: 'auto' }}>
+            {/* Chat directory list */}
+            <div style={{ height: columnHeight, display: 'flex', flexDirection: 'column', gap: '10px', overflowY: 'auto' }}>
               {sortedProjects.map(project => {
                 const isSelected = selectedProjectId === project.id;
                 return (
                   <div
                     key={project.id}
-                    onClick={() => setSelectedProjectId(project.id)}
+                    onClick={() => handleSelectProject(project.id)}
                     className="panel"
                     style={{
                       padding: '12px',
@@ -265,10 +348,8 @@ export default function ChatHub() {
               })}
             </div>
 
-          </div>
-
-          {/* Right Column (60% width): Selected Chat Preview Pane */}
-          <div className="panel" style={{ width: '60%', height: columnHeight, display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: 0 }}>
+          {/* Selected Chat Preview Pane */}
+          <div className="panel" style={{ height: columnHeight, display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: 0 }}>
             {previewLoading ? (
               <div style={{ margin: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
                 <div style={{ width: '32px', height: '32px', borderRadius: '50%', border: '2px solid var(--border-subtle)', borderTopColor: 'var(--semantic-primary)', animation: 'spin 0.8s linear infinite' }} />

@@ -127,7 +127,7 @@ export default function Dashboard() {
   });
 
   return (
-    <main className="main-content" style={{ maxWidth: '1120px' }}>
+    <main className="main-content" style={{ maxWidth: 'min(1400px, 90vw)' }}>
       <div>
         <h1 className="section-title h1-page" style={{ marginBottom: '8px' }}>Dashboard</h1>
         <p className="body-text" style={{ color: 'var(--text-secondary)' }}>
@@ -183,7 +183,7 @@ export default function Dashboard() {
 
       <div style={{
         display: 'grid',
-        gridTemplateColumns: '2fr 1fr',
+        gridTemplateColumns: '65fr 35fr',
         gap: '16px',
         alignItems: 'start'
       }}>

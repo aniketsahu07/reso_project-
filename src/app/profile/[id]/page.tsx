@@ -75,13 +75,13 @@ export default function PublicProfile({ params }: { params: { id: string } }) {
   const completedProjects = projects.filter(p => p.status === 'Completed');
 
   return (
-    <main className="main-content" style={{ maxWidth: '1100px', paddingTop: '96px' }}>
+    <main className="main-content" style={{ maxWidth: 'min(1400px, 90vw)', paddingTop: '96px' }}>
       <BackButton href="back" text="Go Back" />
 
       <style>{`
         .bento-grid {
           display: grid;
-          grid-template-columns: repeat(12, minmax(0, 1fr));
+          grid-template-columns: repeat(10, minmax(0, 1fr));
           gap: 16px;
         }
         .bento-item {
@@ -93,8 +93,8 @@ export default function PublicProfile({ params }: { params: { id: string } }) {
           position: relative;
           overflow: hidden;
         }
-        .bento-header { grid-column: span 12; }
-        .bento-main { grid-column: span 8; display: flex; flex-direction: column; gap: 12px; }
+        .bento-header { grid-column: span 10; }
+        .bento-main { grid-column: span 6; display: flex; flex-direction: column; gap: 12px; }
         .bento-sidebar { grid-column: span 4; display: flex; flex-direction: column; gap: 16px; align-self: start; position: sticky; top: 96px; }
         .sidebar-section {
           display: flex;
@@ -120,7 +120,7 @@ export default function PublicProfile({ params }: { params: { id: string } }) {
           height: 100%;
         }
         @media (max-width: 900px) {
-          .bento-main, .bento-sidebar { grid-column: span 12; position: static; top: auto; }
+          .bento-main, .bento-sidebar { grid-column: span 10; position: static; top: auto; }
         }
         @media (max-width: 600px) {
           .bento-item { padding: 20px; }

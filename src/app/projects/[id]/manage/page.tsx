@@ -291,7 +291,7 @@ export default function ManageProject({ params }: { params: { id: string } }) {
   }
 
   return (
-    <main className="main-content" style={{ maxWidth: '1000px' }}>
+    <main className="main-content" style={{ maxWidth: 'min(1400px, 90vw)' }}>
       <BackButton href="/dashboard" text="Back to Dashboard" />
 
       <div style={{ marginBottom: '32px' }}>
@@ -299,7 +299,7 @@ export default function ManageProject({ params }: { params: { id: string } }) {
         <p style={{ color: 'var(--text-secondary)', fontSize: '1.05rem' }}>Manage your team and track your progress.</p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '32px' }}>
+      <div className="manage-project-grid">
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           {applications.filter(a => a.status === 'Accepted').length > 0 && (

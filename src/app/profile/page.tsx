@@ -107,11 +107,11 @@ export default function Profile() {
   const skills = profile?.user_skills || [];
 
   return (
-    <main style={{ maxWidth: '1100px', margin: '0 auto', padding: '96px 16px 40px' }}>
+    <main style={{ maxWidth: 'min(1400px, 90vw)', margin: '0 auto', padding: '96px 16px 40px' }}>
       <style>{`
         .bento-grid {
           display: grid;
-          grid-template-columns: repeat(12, 1fr);
+          grid-template-columns: repeat(10, 1fr);
           gap: 16px;
         }
         .bento-item {
@@ -124,13 +124,13 @@ export default function Profile() {
           overflow: visible;
         }
         .bento-header {
-          grid-column: span 12;
+          grid-column: span 10;
           display: flex;
           align-items: center;
           gap: 20px;
           padding: 24px 32px !important;
         }
-        .bento-main { grid-column: span 8; display: flex; flex-direction: column; gap: 12px; }
+        .bento-main { grid-column: span 6; display: flex; flex-direction: column; gap: 12px; }
         .bento-sidebar { grid-column: span 4; display: flex; flex-direction: column; gap: 16px; align-self: start; position: sticky; top: 96px; }
         .sidebar-section {
           display: flex;
@@ -152,7 +152,7 @@ export default function Profile() {
         }
         
         @media (max-width: 900px) {
-          .bento-main, .bento-sidebar { grid-column: span 12; position: static; top: auto; }
+          .bento-main, .bento-sidebar { grid-column: span 10; position: static; top: auto; }
         }
         @media (max-width: 700px) {
           .bento-header { flex-wrap: wrap; padding: 20px !important; }

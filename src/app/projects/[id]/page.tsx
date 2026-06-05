@@ -219,11 +219,11 @@ export default function ProjectDetail({ params }: { params: { id: string } }) {
   const isFounder = user?.id === project.founder_id;
 
   return (
-    <main style={{ maxWidth: '1100px', margin: '0 auto', padding: '96px 16px 40px' }}>
+    <main style={{ maxWidth: 'min(1400px, 90vw)', margin: '0 auto', padding: '96px 16px 40px' }}>
       <style>{`
         .bento-grid {
           display: grid;
-          grid-template-columns: repeat(12, 1fr);
+          grid-template-columns: 65fr 35fr;
           gap: 16px;
         }
         .bento-item {
@@ -233,12 +233,15 @@ export default function ProjectDetail({ params }: { params: { id: string } }) {
           padding: 24px;
           box-shadow: none;
         }
-        .bento-header { grid-column: span 12; position: relative; overflow: hidden; }
-        .bento-main { grid-column: span 8; display: flex; flex-direction: column; gap: 16px; }
-        .bento-sidebar { grid-column: span 4; display: flex; flex-direction: column; gap: 16px; position: sticky; top: 96px; align-self: start; }
+        .bento-header { grid-column: span 2; position: relative; overflow: hidden; }
+        .bento-main { display: flex; flex-direction: column; gap: 16px; }
+        .bento-sidebar { display: flex; flex-direction: column; gap: 16px; position: sticky; top: 96px; align-self: start; }
         
         @media (max-width: 900px) {
-          .bento-main, .bento-sidebar { grid-column: span 12; }
+          .bento-grid {
+            grid-template-columns: 1fr;
+          }
+          .bento-header { grid-column: span 1; }
           .bento-sidebar { order: -1; }
         }
       `}</style>

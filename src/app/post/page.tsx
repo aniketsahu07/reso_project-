@@ -90,7 +90,7 @@ export default function PostProject() {
   };
 
   return (
-    <main className="main-content" style={{ maxWidth: '800px', paddingTop: '88px' }}>
+    <main className="main-content" style={{ maxWidth: '1000px', paddingTop: '88px' }}>
       
       <form onSubmit={handleSubmit} className="panel" style={{ padding: '32px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
         <div style={{ marginBottom: '8px' }}>
@@ -170,7 +170,7 @@ export default function PostProject() {
             <span>Project Skills (Click to toggle: Required <span style={{color:'var(--text-secondary)'}}>→</span> Nice-to-Have <span style={{color:'var(--text-secondary)'}}>→</span> Remove)</span>
             <span style={{ color: Object.keys(skills).length === 15 ? 'var(--semantic-error)' : 'var(--text-secondary)' }}>{Object.keys(skills).length} / 15</span>
           </label>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '8px' }}>
+          <div className="skills-input-grid">
             {PREDEFINED_SKILLS.map(skill => {
               const state = skills[skill];
               const isDisabled = !state && Object.keys(skills).length >= 15;

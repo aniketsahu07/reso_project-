@@ -108,7 +108,7 @@ export default function SkillMatchPage() {
   };
 
   return (
-    <main className="main-content" style={{ maxWidth: '1150px', paddingTop: '88px' }}>
+    <main className="main-content" style={{ maxWidth: 'min(1400px, 90vw)', paddingTop: '88px' }}>
 
       {/* Title & Introduction Section */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '12px' }}>
@@ -184,7 +184,7 @@ export default function SkillMatchPage() {
 
       {/* Main Results Listing */}
       {aiLoading ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '24px', marginTop: '0px' }}>
+        <div className="match-grid" style={{ gap: '24px', marginTop: '0px' }}>
           {[1, 2, 3].map((n) => (
             <div key={n} className="panel" style={{ height: '340px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', position: 'relative', overflow: 'hidden' }}>
               <div style={{ height: '3px', width: '100%', position: 'absolute', top: 0, left: 0, background: 'var(--border-subtle)' }}></div>
@@ -230,7 +230,7 @@ export default function SkillMatchPage() {
           </div>
 
           {/* Match cards */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: '28px' }}>
+          <div className="match-grid">
             {aiProjects.map((project) => {
               const styles = getMatchColor(project.matchScore);
               return (
