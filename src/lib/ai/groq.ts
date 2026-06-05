@@ -10,6 +10,7 @@ type GroqScoreResponse = {
   score: number;
 };
 
+const AI_PROVIDER = process.env.AI_PROVIDER || 'groq';
 const GROQ_MODEL = process.env.GROQ_MODEL || 'llama-3.1-8b-instant';
 const MAX_PROJECT_CHARS = 900;
 
@@ -29,7 +30,9 @@ const extractJsonArray = (text: string) => {
 };
 
 export const scoreProjectsWithGroq = async (userSummary: string, projects: GroqProjectInput[]) => {
-  if (!process.env.GROQ_API_KEY) {
+  const isOllama = AI_PROVIDER === 'ollama';
+
+  if (!isOllama && !process.env.GROQ_API_KEY) {
     return { scores: new Map<string, number>(), usedGroq: false };
   }
 
@@ -43,30 +46,49 @@ export const scoreProjectsWithGroq = async (userSummary: string, projects: GroqP
     'Return ONLY a JSON array of objects: [{"id":"...","score":0-100}].',
     'Score 0 means no fit, 100 means perfect fit based on skills and profile context.',
     '',
+    'Scoring Rubric Guidelines:',
+    '- 80-100%: User has all or almost all required core skills and experience.',
+    '- 50-79%: User has the primary core skills (e.g. Next.js, React, Python) needed to build the main parts of the project, even if they lack secondary skills.',
+    '- 20-49%: User has some relevant/related skills but lacks the main technology.',
+    '- 0-19%: Very low or no match.',
+    'Do not cluster scores at 10% or generic numbers. Scale them dynamically based on the rubric above to reflect a realistic fit.',
+    '',
     `USER: ${trimText(userSummary)}`,
     '',
     `PROJECTS: ${JSON.stringify(preparedProjects)}`
   ].join('\n');
 
-  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+  const apiUrl = isOllama
+    ? `${process.env.OLLAMA_BASE_URL || 'http://127.0.0.1:11434'}/v1/chat/completions`
+    : 'https://api.groq.com/openai/v1/chat/completions';
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json'
+  };
+  if (!isOllama) {
+    headers['Authorization'] = `Bearer ${process.env.GROQ_API_KEY}`;
+  }
+
+  const model = isOllama
+    ? (process.env.OLLAMA_MODEL || 'llama3.1')
+    : GROQ_MODEL;
+
+  const response = await fetch(apiUrl, {
     method: 'POST',
-    headers: {
-      Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
-      'Content-Type': 'application/json'
-    },
+    headers,
     body: JSON.stringify({
-      model: GROQ_MODEL,
+      model,
       messages: [
         { role: 'system', content: 'You must follow the output format strictly.' },
         { role: 'user', content: prompt }
       ],
-      temperature: 0.2,
+      temperature: isOllama ? 0.0 : 0.2,
       max_tokens: 600
     })
   });
 
   if (!response.ok) {
-    return { scores: new Map<string, number>(), usedGroq: false };
+    return { scores: new Map<string, number>(), usedGroq: !isOllama };
   }
 
   const payload = await response.json();
@@ -85,5 +107,5 @@ export const scoreProjectsWithGroq = async (userSummary: string, projects: GroqP
     }
   }
 
-  return { scores, usedGroq: true };
+  return { scores, usedGroq: !isOllama };
 };

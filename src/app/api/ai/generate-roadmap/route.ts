@@ -39,7 +39,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'projectId is required' }, { status: 400 });
     }
 
-    if (!process.env.GROQ_API_KEY) {
+    const AI_PROVIDER = process.env.AI_PROVIDER || 'groq';
+    const isOllama = AI_PROVIDER === 'ollama';
+
+    if (!isOllama && !process.env.GROQ_API_KEY) {
       return NextResponse.json({ error: 'GROQ_API_KEY is not configured on the server.' }, { status: 500 });
     }
 
@@ -139,15 +142,27 @@ export async function POST(request: Request) {
       ']'
     ].join('\n');
 
-    // 6. Request Llama 3.1 score/generation from Groq API
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    const apiUrl = isOllama
+      ? `${process.env.OLLAMA_BASE_URL || 'http://127.0.0.1:11434'}/v1/chat/completions`
+      : 'https://api.groq.com/openai/v1/chat/completions';
+
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json'
+    };
+    if (!isOllama) {
+      headers['Authorization'] = `Bearer ${process.env.GROQ_API_KEY}`;
+    }
+
+    const model = isOllama
+      ? (process.env.OLLAMA_MODEL || 'llama3.1')
+      : GROQ_MODEL;
+
+    // 6. Request Llama 3.1 score/generation from AI API
+    const response = await fetch(apiUrl, {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
+      headers,
       body: JSON.stringify({
-        model: GROQ_MODEL,
+        model,
         messages: [
           { role: 'system', content: 'You are a precise JSON generator. Output ONLY a valid JSON array and nothing else.' },
           { role: 'user', content: prompt }
@@ -159,7 +174,7 @@ export async function POST(request: Request) {
 
     if (!response.ok) {
       const details = await response.text();
-      return NextResponse.json({ error: `Groq AI generation failed: ${details}` }, { status: 500 });
+      return NextResponse.json({ error: `AI generation failed: ${details}` }, { status: 500 });
     }
 
     const payload = await response.json();
