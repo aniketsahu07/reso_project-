@@ -1,10 +1,15 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import { ChevronRight, Users, Clock } from 'lucide-react';
 import Link from 'next/link';
 
 export default function ProjectCard({ project }: { project: any }) {
+  const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({});
+
+  function toggleSkills(projectId: string) {
+    setExpandedCards(prev => ({ ...prev, [projectId]: !prev[projectId] }));
+  }
   return (
     <div
       className="card project-card"
@@ -80,34 +85,78 @@ export default function ProjectCard({ project }: { project: any }) {
 
         {/* Skills */}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginTop: 'auto', paddingTop: '8px' }}>
-          {(project.skillsRequired || []).slice(0, 4).map((skill: string) => {
-            const isMatch = project.matchedSkills?.includes(skill);
-            return (
+          {!expandedCards[project.id] ? (
+            <>
+              {(project.skillsRequired || []).slice(0, 4).map((skill: string) => {
+                const isMatch = project.matchedSkills?.includes(skill);
+                return (
+                  <span
+                    key={skill}
+                    className={isMatch ? "skill-badge match" : "skill-badge"}
+                    style={{
+                      padding: '3px 8px',
+                      borderRadius: '6px',
+                      fontSize: '0.72rem',
+                      fontWeight: 500,
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    {skill}
+                  </span>
+                );
+              })}
+              {(project.skillsRequired?.length || 0) > 4 && (
+                <span
+                  className="skill-badge cursor-pointer"
+                  style={{
+                    padding: '3px 8px', borderRadius: '6px',
+                    fontSize: '0.72rem', fontWeight: 400,
+                    background: 'transparent',
+                    border: '1px solid rgba(100,116,139,0.25)',
+                    color: '#64748b',
+                    cursor: 'pointer'
+                  }}
+                  onClick={(e) => { e.stopPropagation(); toggleSkills(project.id); }}
+                >
+                  +{project.skillsRequired.length - 4} more
+                </span>
+              )}
+            </>
+          ) : (
+            <>
+              {(project.skillsRequired || []).map((skill: string) => {
+                const isMatch = project.matchedSkills?.includes(skill);
+                return (
+                  <span
+                    key={skill}
+                    className={isMatch ? "skill-badge match" : "skill-badge"}
+                    style={{
+                      padding: '3px 8px',
+                      borderRadius: '6px',
+                      fontSize: '0.72rem',
+                      fontWeight: 500,
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    {skill}
+                  </span>
+                );
+              })}
               <span
-                key={skill}
-                className={isMatch ? "skill-badge match" : "skill-badge"}
+                className="skill-badge cursor-pointer"
                 style={{
-                  padding: '3px 8px',
-                  borderRadius: '6px',
-                  fontSize: '0.72rem',
-                  fontWeight: 500,
-                  whiteSpace: 'nowrap'
+                  padding: '3px 8px', borderRadius: '6px',
+                  fontSize: '0.72rem', fontWeight: 400,
+                  background: 'transparent',
+                  border: '1px solid rgba(100,116,139,0.25)',
+                  color: '#64748b',
+                  cursor: 'pointer'
                 }}
+                onClick={(e) => { e.stopPropagation(); toggleSkills(project.id); }}
               >
-                {skill}
+                show less
               </span>
-            );
-          })}
-          {(project.skillsRequired?.length || 0) > 4 && (
-            <span style={{
-              padding: '3px 8px', borderRadius: '6px',
-              fontSize: '0.72rem', fontWeight: 400,
-              background: 'transparent',
-              border: '1px solid rgba(100,116,139,0.25)',
-              color: '#64748b'
-            }}>
-              +{project.skillsRequired.length - 4} more
-            </span>
+            </>
           )}
         </div>
       </div>

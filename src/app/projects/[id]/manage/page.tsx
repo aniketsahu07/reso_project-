@@ -35,6 +35,22 @@ export default function ManageProject({ params }: { params: { id: string } }) {
   const [aiError, setAiError] = useState<string | null>(null);
   const [publishingRoadmap, setPublishingRoadmap] = useState(false);
 
+  // Milestone helper states
+  const [expandedMilestones, setExpandedMilestones] = useState<Record<string, boolean>>({});
+  const toggleMilestone = (milestoneId: string) => {
+    setExpandedMilestones(prev => ({ ...prev, [milestoneId]: !prev[milestoneId] }));
+  };
+
+  const completedMilestonesCount = milestones.filter(m => {
+    try {
+      const parsed = JSON.parse(m.description);
+      return parsed.completed === true;
+    } catch (e) {
+      return false;
+    }
+  }).length;
+
+
   const handleGenerateRoadmap = async () => {
     setAiGenerating(true);
     setAiError(null);
@@ -305,12 +321,17 @@ export default function ManageProject({ params }: { params: { id: string } }) {
         </p>
       </div>
 
-      <div className="manage-project-grid">
+      <div className="manage-project-grid align-start" style={{ alignItems: 'start' }}>
 
+        {/* Left Column */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          {applications.filter(a => a.status === 'Accepted').length > 0 && (
-            <div>
-              <h2 style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--semantic-success)', marginBottom: '16px' }}>Active Roster</h2>
+          <div>
+            <h2 style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--semantic-success)', marginBottom: '16px' }}>Active Roster</h2>
+            {applications.filter(a => a.status === 'Accepted').length === 0 ? (
+              <div className="card" style={{ padding: '32px', textAlign: 'center' }}>
+                <p style={{ color: 'var(--text-secondary)' }}>No active team members yet.</p>
+              </div>
+            ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {applications.filter(a => a.status === 'Accepted').map(app => {
                   const applicant = Array.isArray(app.users) ? app.users[0] : app.users;
@@ -338,8 +359,8 @@ export default function ManageProject({ params }: { params: { id: string } }) {
                   );
                 })}
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
           <div>
             <h2 style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '16px' }}>Pending Requests</h2>
@@ -383,7 +404,7 @@ export default function ManageProject({ params }: { params: { id: string } }) {
 
                       <div style={{ marginBottom: '20px' }}>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                          {applicant?.user_skills?.map((skill: any) => (
+                          {applicant?.user_skills?.map((skill) => (
                             <span key={skill.skill_name} className="badge badge-success" style={{ fontSize: '0.75rem', padding: '4px 10px' }}>{skill.skill_name}</span>
                           ))}
                         </div>
@@ -425,150 +446,64 @@ export default function ManageProject({ params }: { params: { id: string } }) {
             )}
           </div>
 
-          <div className="card" style={{ padding: '24px', marginBottom: '24px', marginTop: '32px' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '16px' }}>Post New Milestone</h3>
-            <form onSubmit={handlePostMilestone} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <input
-                type="text"
-                required
-                className="search-field"
-                placeholder="Milestone Title (e.g. Database Designed)"
-                value={milestoneTitle}
-                onChange={(e) => setMilestoneTitle(e.target.value)}
-              />
-              <div style={{ display: 'flex', gap: '12px' }}>
+          {/* Post New Milestone form */}
+          <div>
+            <h2 className="text-lg font-semibold mb-3" style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '12px', color: 'var(--text-primary)' }}>Post New Milestone</h2>
+            <div className="card border border-gray-700 rounded-xl" style={{ padding: '16px', border: '1px solid #374151', borderRadius: '12px', marginBottom: '24px' }}>
+              <form onSubmit={handlePostMilestone} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <input
-                  type="date"
+                  type="text"
+                  required
                   className="search-field"
-                  style={{ colorScheme: 'dark', width: '50%' }}
-                  value={milestoneDue}
-                  onChange={(e) => setMilestoneDue(e.target.value)}
+                  placeholder="Milestone Title (e.g. Database Designed)"
+                  value={milestoneTitle}
+                  onChange={(e) => setMilestoneTitle(e.target.value)}
                 />
-                <select
-                  className="search-field"
-                  style={{ appearance: 'none', width: '50%' }}
-                  value={milestoneAssigned}
-                  onChange={(e) => setMilestoneAssigned(e.target.value)}
-                >
-                  <option value="">Assign to (Optional)</option>
-                  <option value={project.founder_id}>Myself (Founder)</option>
-                  {applications.filter(a => a.status === 'Accepted').map(a => {
-                    const applicant = Array.isArray(a.users) ? a.users[0] : a.users;
-                    return (
-                      <option key={a.applicant_id} value={a.applicant_id}>
-                        {applicant?.full_name || 'Anonymous'}
-                      </option>
-                    );
-                  })}
-                </select>
-              </div>
-              <textarea
-                required
-                className="search-field"
-                placeholder="What is the goal of this milestone?"
-                style={{ minHeight: '100px', resize: 'vertical' }}
-                value={milestoneDesc}
-                onChange={(e) => setMilestoneDesc(e.target.value)}
-              />
-              <button type="submit" disabled={postingMilestone} className="btn-primary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px' }}>
-                <Plus size={16} /> {postingMilestone ? 'Posting...' : 'Add Milestone'}
-              </button>
-            </form>
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  <input
+                    type="date"
+                    className="search-field"
+                    style={{ colorScheme: 'dark', width: '50%' }}
+                    value={milestoneDue}
+                    onChange={(e) => setMilestoneDue(e.target.value)}
+                  />
+                  <select
+                    className="search-field"
+                    style={{ appearance: 'none', width: '50%' }}
+                    value={milestoneAssigned}
+                    onChange={(e) => setMilestoneAssigned(e.target.value)}
+                  >
+                    <option value="">Assign to (Optional)</option>
+                    <option value={project.founder_id}>Myself (Founder)</option>
+                    {applications.filter(a => a.status === 'Accepted').map(a => {
+                      const applicant = Array.isArray(a.users) ? a.users[0] : a.users;
+                      return (
+                        <option key={a.applicant_id} value={a.applicant_id}>
+                          {applicant?.full_name || 'Anonymous'}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
+                <textarea
+                  required
+                  className="search-field min-h-[120px]"
+                  placeholder="What is the goal of this milestone?"
+                  style={{ minHeight: '120px', resize: 'vertical' }}
+                  value={milestoneDesc}
+                  onChange={(e) => setMilestoneDesc(e.target.value)}
+                />
+                <button type="submit" disabled={postingMilestone} className="btn-primary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px' }}>
+                  <Plus size={16} /> {postingMilestone ? 'Posting...' : 'Add Milestone'}
+                </button>
+              </form>
+            </div>
           </div>
 
+          {/* GitHub Repository (Integrations) */}
           <div>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '16px' }}>Past Milestones</h3>
-            {milestones.length === 0 ? (
-              <div className="card" style={{ padding: '24px', textAlign: 'center' }}>
-                <p style={{ color: 'var(--text-secondary)' }}>No milestones yet. Post your first milestone above ↑</p>
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                {milestones.map(m => {
-                  let details: any = { desc: m.description, due: '', assigned: '', completed: false, completed_at: '' };
-                  try {
-                    const parsed = JSON.parse(m.description);
-                    if (parsed.desc !== undefined) details = { ...details, ...parsed };
-                  } catch (e) { }
-
-                  const isOverdue = !details.completed && details.due && new Date(details.due) < new Date(new Date().setHours(0, 0, 0, 0));
-
-                  let assignedName = '';
-                  if (details.assigned) {
-                    if (details.assigned === project.founder_id) assignedName = 'Founder';
-                    else {
-                      const assignedApp = applications.find(a => a.applicant_id === details.assigned);
-                      const appUser = assignedApp ? (Array.isArray(assignedApp.users) ? assignedApp.users[0] : assignedApp.users) : null;
-                      assignedName = appUser?.full_name || 'Team Member';
-                    }
-                  }
-
-                  return (
-                    <div key={m.id} className="card" style={{ padding: '20px', borderColor: details.completed ? 'var(--semantic-success-border)' : isOverdue ? 'var(--semantic-error-border)' : undefined }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px', flexWrap: 'wrap', gap: '8px' }}>
-                        <h4 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>{m.title}</h4>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                            Added {new Date(m.created_at).toLocaleDateString()}
-                          </span>
-                          <button
-                            onClick={() => handleDeleteMilestone(m.id)}
-                            style={{ background: 'transparent', color: 'var(--semantic-error)', opacity: 0.7, border: 'none', padding: '4px', borderRadius: '6px', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
-                            onMouseEnter={(e) => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.background = 'var(--semantic-error-bg)'; }}
-                            onMouseLeave={(e) => { e.currentTarget.style.opacity = '0.7'; e.currentTarget.style.background = 'transparent'; }}
-                            title="Delete Milestone"
-                          >
-                            <Trash2 size={15} />
-                          </button>
-                        </div>
-                      </div>
-                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.6, margin: '0 0 16px 0' }}>{details.desc}</p>
-
-                      <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '12px', fontSize: '0.85rem', color: 'var(--text-secondary)', borderTop: '1px solid var(--semantic-primary-border)', paddingTop: '16px' }}>
-                        {details.due && (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: isOverdue ? 'var(--semantic-error)' : undefined }}>
-                            <Clock size={14} color={isOverdue ? 'var(--semantic-error)' : 'var(--semantic-warning)'} /> Due: {new Date(details.due).toLocaleDateString()}
-                          </div>
-                        )}
-                        {assignedName && (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <Check size={14} color="var(--semantic-success)" /> Assigned to: {assignedName}
-                          </div>
-                        )}
-                        {isOverdue && <span style={{ color: 'var(--semantic-error)', fontWeight: 600 }}>⚠️ Overdue</span>}
-
-                        <div style={{ marginLeft: 'auto' }}>
-                          {details.completed ? (
-                            <span style={{
-                              display: 'inline-flex', alignItems: 'center', gap: '4px',
-                              background: 'var(--semantic-success-bg)', color: 'var(--semantic-success)',
-                              padding: '4px 10px', borderRadius: 'var(--radius-md)', fontSize: '0.75rem', fontWeight: 600, border: '1px solid var(--semantic-success-border)'
-                            }}>
-                              ✓ Completed {details.completed_at && `on ${new Date(details.completed_at).toLocaleDateString()}`}
-                            </span>
-                          ) : (
-                            <button
-                              onClick={() => handleCompleteMilestone(m.id, m.description)}
-                              className="btn-ghost"
-                              style={{ padding: '6px 14px', fontSize: '0.8rem', border: '1px solid var(--semantic-success-border)', color: 'var(--semantic-success)' }}
-                            >
-                              Mark Complete
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          <div>
-            <h2 style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '16px' }}>Integrations</h2>
-            <div className="card" style={{ padding: '24px' }}>
+            <h2 className="text-lg font-semibold mb-3" style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '12px', color: 'var(--text-primary)' }}>Integrations</h2>
+            <div className="card border border-gray-700 rounded-xl" style={{ padding: '16px', border: '1px solid #374151', borderRadius: '12px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
                 <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'var(--semantic-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <GitBranch size={16} color="var(--text-white)" />
@@ -597,13 +532,10 @@ export default function ManageProject({ params }: { params: { id: string } }) {
             </div>
           </div>
 
+          {/* BuildTrack Roadmap */}
           <div>
-            <h2 style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              BuildTrack Roadmap
-            </h2>
-
-            {/* Roadmap generator */}
-            <div className="card" style={{ padding: '24px', marginBottom: '24px', borderLeft: '4px solid var(--semantic-primary)', position: 'relative' }}>
+            <h2 className="text-lg font-semibold mb-3" style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '12px', color: 'var(--text-primary)' }}>BuildTrack Roadmap</h2>
+            <div className="card border border-gray-700 rounded-xl" style={{ padding: '16px', marginBottom: '24px', border: '1px solid #374151', borderRadius: '12px', borderLeft: '4px solid var(--semantic-primary)', position: 'relative' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                 <div style={{ background: 'var(--semantic-primary-bg)', color: 'var(--semantic-primary)', padding: '4px 10px', borderRadius: '8px', fontSize: '0.7rem', fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                   Suggested plan
@@ -668,8 +600,29 @@ export default function ManageProject({ params }: { params: { id: string } }) {
                   )}
                   <button
                     onClick={handleGenerateRoadmap}
-                    className="btn-primary"
-                    style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontWeight: 600, fontSize: '0.9rem', padding: '12px', borderRadius: '8px', border: 'none' }}
+                    className="btn-primary w-full bg-purple-600 hover:bg-purple-700 text-white"
+                    style={{
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      fontWeight: 600,
+                      fontSize: '0.9rem',
+                      padding: '12px',
+                      borderRadius: '8px',
+                      border: 'none',
+                      background: '#a855f7',
+                      color: '#ffffff',
+                      cursor: 'pointer',
+                      transition: 'background-color 0.2s'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#9333ea';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = '#a855f7';
+                    }}
                   >
                     Generate roadmap
                   </button>
@@ -677,12 +630,177 @@ export default function ManageProject({ params }: { params: { id: string } }) {
               )}
             </div>
           </div>
+        </div>
 
-          <div style={{ marginTop: '48px' }}>
-            <h2 style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--semantic-error)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        {/* Right Column */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', minHeight: '100%' }}>
+          {/* Past Milestones */}
+          <div>
+            <h2 className="text-lg font-semibold mb-3" style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '12px', color: 'var(--text-primary)' }}>Past Milestones</h2>
+            
+            {/* Milestone Progress Bar */}
+            {milestones.length > 0 && (
+              <div style={{ marginBottom: '20px', background: 'var(--bg-card)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border-subtle)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-secondary)' }}>Milestone Progress</span>
+                  <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--semantic-success)' }}>
+                    {completedMilestonesCount} of {milestones.length} completed
+                  </span>
+                </div>
+                <div style={{ width: '100%', height: '8px', background: '#2a2a2a', borderRadius: '999px', overflow: 'hidden' }}>
+                  <div style={{
+                    width: `${(completedMilestonesCount / milestones.length) * 100}%`,
+                    height: '100%',
+                    background: 'linear-gradient(90deg, #10b981 0%, #059669 100%)',
+                    borderRadius: '999px',
+                    transition: 'width 0.3s ease'
+                  }} />
+                </div>
+              </div>
+            )}
+
+            {milestones.length === 0 ? (
+              <div className="card" style={{ padding: '24px', textAlign: 'center' }}>
+                <p style={{ color: 'var(--text-secondary)' }}>No milestones yet. Post your first milestone above ↑</p>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {milestones.map(m => {
+                  let details = { desc: m.description, due: '', assigned: '', completed: false, completed_at: '' };
+                  try {
+                    const parsed = JSON.parse(m.description);
+                    if (parsed.desc !== undefined) details = { ...details, ...parsed };
+                  } catch (e) { }
+
+                  const isOverdue = !details.completed && details.due && new Date(details.due) < new Date(new Date().setHours(0, 0, 0, 0));
+
+                  let assignedName = '';
+                  if (details.assigned) {
+                    if (details.assigned === project.founder_id) assignedName = 'Founder';
+                    else {
+                      const assignedApp = applications.find(a => a.applicant_id === details.assigned);
+                      const appUser = assignedApp ? (Array.isArray(assignedApp.users) ? assignedApp.users[0] : assignedApp.users) : null;
+                      assignedName = appUser?.full_name || 'Team Member';
+                    }
+                  }
+
+                  return (
+                    <div key={m.id} className="card border-l-4 border-purple-500" style={{ position: 'relative', padding: '20px', borderColor: details.completed ? 'var(--semantic-success-border)' : isOverdue ? 'var(--semantic-error-border)' : undefined, borderLeft: '4px solid #a855f7' }}>
+                      <button
+                        onClick={() => handleDeleteMilestone(m.id)}
+                        style={{ position: 'absolute', top: '16px', right: '16px', background: 'transparent', color: 'var(--semantic-error)', opacity: 0.7, border: 'none', padding: '6px', borderRadius: '6px', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                        onMouseEnter={(e) => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.background = 'var(--semantic-error-bg)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.opacity = '0.7'; e.currentTarget.style.background = 'transparent'; }}
+                        title="Delete Milestone"
+                      >
+                        <Trash2 size={15} />
+                      </button>
+
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '12px', paddingRight: '36px' }}>
+                        <h4 className="font-semibold text-base" style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>{m.title}</h4>
+                        <span className="text-xs text-gray-400" style={{ fontSize: '0.75rem', color: '#9ca3af' }}>
+                          Added {new Date(m.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+
+                      <p style={{
+                        color: 'var(--text-secondary)',
+                        fontSize: '0.95rem',
+                        lineHeight: 1.6,
+                        margin: '0 0 8px 0',
+                        display: !expandedMilestones[m.id] ? '-webkit-box' : 'block',
+                        WebkitLineClamp: !expandedMilestones[m.id] ? 3 : undefined,
+                        WebkitBoxOrient: !expandedMilestones[m.id] ? 'vertical' : undefined,
+                        overflow: !expandedMilestones[m.id] ? 'hidden' : 'visible'
+                      }}>{details.desc}</p>
+                      
+                      {details.desc && details.desc.length > 120 && (
+                        <button
+                          type="button"
+                          onClick={() => toggleMilestone(m.id)}
+                          className="text-xs font-semibold"
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            padding: 0,
+                            cursor: 'pointer',
+                            color: '#a855f7',
+                            marginBottom: '16px',
+                            display: 'block'
+                          }}
+                        >
+                          {expandedMilestones[m.id] ? 'Read less' : 'Read more'}
+                        </button>
+                      )}
+
+                      <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '12px', fontSize: '0.85rem', color: 'var(--text-secondary)', borderTop: '1px solid var(--semantic-primary-border)', paddingTop: '16px' }}>
+                        {details.due && (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: isOverdue ? 'var(--semantic-error)' : undefined }}>
+                            <Clock size={14} color={isOverdue ? 'var(--semantic-error)' : 'var(--semantic-warning)'} /> Due: {new Date(details.due).toLocaleDateString()}
+                          </div>
+                        )}
+                        {assignedName && (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <Check size={14} color="var(--semantic-success)" /> Assigned to: {assignedName}
+                          </div>
+                        )}
+                        {isOverdue && <span style={{ color: 'var(--semantic-error)', fontWeight: 600 }}>⚠️ Overdue</span>}
+                      </div>
+
+                      <div style={{ marginTop: '16px', width: '100%' }}>
+                        {details.completed ? (
+                          <span style={{
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px',
+                            background: 'var(--semantic-success-bg)', color: 'var(--semantic-success)',
+                            padding: '8px 12px', borderRadius: 'var(--radius-md)', fontSize: '0.75rem', fontWeight: 600, border: '1px solid var(--semantic-success-border)'
+                          }}>
+                            ✓ Completed {details.completed_at && `on ${new Date(details.completed_at).toLocaleDateString()}`}
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => handleCompleteMilestone(m.id, m.description)}
+                            className="border border-green-600 text-green-500 hover:bg-green-600 hover:text-white"
+                            style={{
+                              width: '100%',
+                              padding: '10px 16px',
+                              fontSize: '0.875rem',
+                              fontWeight: 600,
+                              borderRadius: '8px',
+                              background: 'transparent',
+                              border: '1px solid #16a34a',
+                              color: '#22c55e',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.background = '#16a34a';
+                              e.currentTarget.style.color = '#ffffff';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.background = 'transparent';
+                              e.currentTarget.style.color = '#22c55e';
+                            }}
+                          >
+                            Mark Complete
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Danger Zone */}
+          <div style={{ marginTop: '32px' }} className="mt-8">
+            <h2 className="text-lg font-semibold mb-3" style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '12px', color: 'var(--semantic-error)', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <AlertTriangle size={20} /> Danger Zone
             </h2>
-            <div className="card" style={{ padding: '24px', border: '1px solid var(--semantic-error-border)', background: 'var(--semantic-error-bg)' }}>
+            <div className="card border-l-4 border-red-600" style={{ padding: '24px', border: '1px solid var(--semantic-error-border)', borderLeft: '4px solid #dc2626', background: 'var(--semantic-error-bg)' }}>
               <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '8px' }}>Delete Project</h3>
               <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '16px', lineHeight: 1.5 }}>
                 Once you delete a project, there is no going back. This will remove all applications, milestones, and data associated with this project.
@@ -708,6 +826,10 @@ export default function ManageProject({ params }: { params: { id: string } }) {
         </div>
 
       </div>
+
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+      `}</style>
     </main>
   );
 }
