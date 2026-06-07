@@ -9,7 +9,8 @@ import { useRouter } from 'next/navigation';
 
 /* ── Hero ──────────────────────────────────────────────────── */
 const HeroSection = ({ onExplore, onHowItWorks }: { onExplore: () => void; onHowItWorks: () => void }) => (
-  <div className="hero-grid">
+  <>
+    <div className="hero-grid min-h-fit">
     {/* Left Column: Text & CTAs */}
     <section className="hero-left-col">
       {/* Platform label */}
@@ -21,7 +22,7 @@ const HeroSection = ({ onExplore, onHowItWorks }: { onExplore: () => void; onHow
         padding: '5px 16px',
         marginBottom: '28px'
       }}>
-        <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#22c55e', flexShrink: 0 }} />
+        <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
         <span style={{ fontSize: '0.82rem', color: '#4F46E5', fontWeight: 600, letterSpacing: '0.02em' }}>
           Student Collaboration Platform · MMMUT
         </span>
@@ -62,14 +63,14 @@ const HeroSection = ({ onExplore, onHowItWorks }: { onExplore: () => void; onHow
       {/* CTAs */}
       <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
         <button
-          className="btn-primary"
+          className="btn-primary bg-indigo-600 hover:bg-indigo-700"
           onClick={onExplore}
           style={{ padding: '13px 30px', fontSize: '1rem', borderRadius: '10px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
         >
           Browse Projects <ArrowRight size={16} />
         </button>
         <button
-          className="btn-ghost"
+          className="btn-ghost border border-gray-600"
           onClick={onHowItWorks}
           style={{ padding: '13px 28px', fontSize: '1rem', borderRadius: '10px' }}
         >
@@ -78,17 +79,19 @@ const HeroSection = ({ onExplore, onHowItWorks }: { onExplore: () => void; onHow
       </div>
 
       {/* Stats row */}
-      <div style={{ display: 'flex', gap: '32px', marginTop: '48px', flexWrap: 'wrap' }}>
-        {[
-          { label: 'Open Projects', value: '20+' },
-          { label: 'Active Builders', value: '100+' },
-          { label: 'Teams Formed', value: '30+' }
-        ].map(stat => (
-          <div key={stat.label}>
-            <div style={{ fontSize: '1.6rem', fontWeight: 700, color: '#f8fafc', lineHeight: 1 }}>{stat.value}</div>
-            <div style={{ fontSize: '0.82rem', color: '#64748b', marginTop: '4px', fontWeight: 500 }}>{stat.label}</div>
-          </div>
-        ))}
+      <div className="flex items-center gap-12 mt-6">
+        <div>
+          <p className="text-3xl font-bold">20+</p>
+          <p className="text-sm text-gray-400">Open Projects</p>
+        </div>
+        <div>
+          <p className="text-3xl font-bold">100+</p>
+          <p className="text-sm text-gray-400">Active Builders</p>
+        </div>
+        <div>
+          <p className="text-3xl font-bold">30+</p>
+          <p className="text-sm text-gray-400">Teams Formed</p>
+        </div>
       </div>
     </section>
 
@@ -242,11 +245,12 @@ const HeroSection = ({ onExplore, onHowItWorks }: { onExplore: () => void; onHow
       </div>
     </div>
   </div>
+  </>
 );
 
 /* ── How It Works ──────────────────────────────────────────── */
 const HowItWorksSection = () => (
-  <section id="how-it-works" style={{ padding: '56px 0 48px', scrollMarginTop: '100px' }}>
+  <section id="how-it-works" className="mt-8" style={{ marginTop: '32px', padding: '24px 0 48px', scrollMarginTop: '100px' }}>
     <div style={{ marginBottom: '36px' }}>
       <h2 style={{
         fontSize: '1.75rem', fontWeight: 700,
@@ -278,10 +282,9 @@ const HowItWorksSection = () => (
           accent: true
         }
       ].map((step, i) => (
-        <div key={i} className="step-card" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <div style={{
+        <div key={i} className={`step-card border border-gray-800 border-l-4 ${['border-indigo-500', 'border-green-500', 'border-orange-500'][i]}`} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div className="bg-indigo-700" style={{
             width: '46px', height: '46px', borderRadius: '10px',
-            background: '#4338CA',
             color: '#ffffff',
             display: 'flex', alignItems: 'center', justifyContent: 'center'
           }}>
@@ -303,6 +306,7 @@ const HowItWorksSection = () => (
 
 /* ── Main Page ─────────────────────────────────────────────── */
 export default function Home() {
+
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('All');
   const [projects, setProjects] = useState<any[]>([]);
@@ -310,6 +314,8 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState('student');
   const [dbError, setDbError] = useState<string | null>(null);
+
+
   const router = useRouter();
 
   const filters = ['All', 'Web App', 'Mobile App', 'AI/ML', 'Hardware/IoT'];

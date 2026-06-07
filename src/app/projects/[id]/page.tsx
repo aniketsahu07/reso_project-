@@ -3,16 +3,10 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../../lib/supabase';
 import { useRouter } from 'next/navigation';
-import { Clock, Users, GitCommit, Award, ChevronLeft, Calendar, Rocket, Send, ExternalLink, Crown } from 'lucide-react';
+import { Clock as ClockIcon, Users, GitCommit, Award, ChevronLeft, Calendar, Rocket, Send, ExternalLink, Crown } from 'lucide-react';
 import Link from 'next/link';
+import { Avatar } from '../../../components/Avatar';
 
-function formatMetaValue(commitment: string): string {
-  const num = parseInt(commitment);
-  if (!isNaN(num)) {
-    return `${num} hr${num !== 1 ? 's' : ''}/wk`;
-  }
-  return commitment;
-}
 
 export default function ProjectDetail({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -35,6 +29,8 @@ export default function ProjectDetail({ params }: { params: { id: string } }) {
   const [userRole, setUserRole] = useState("student");
   const [endorsementNote, setEndorsementNote] = useState("");
   const [endorsing, setEndorsing] = useState(false);
+  const [applicationCount, setApplicationCount] = useState(0);
+  const [showAllSkills, setShowAllSkills] = useState(false);
 
   useEffect(() => {
     async function loadData() {
@@ -125,6 +121,15 @@ export default function ProjectDetail({ params }: { params: { id: string } }) {
 
       if (endorsementsData) {
         setEndorsements(endorsementsData);
+      }
+
+      const { count: appCount } = await supabase
+        .from('applications')
+        .select('*', { count: 'exact', head: true })
+        .eq('project_id', id);
+
+      if (appCount !== null) {
+        setApplicationCount(appCount);
       }
 
       setLoading(false);
@@ -265,8 +270,13 @@ export default function ProjectDetail({ params }: { params: { id: string } }) {
         {/* Header Block */}
         <div className="bento-item bento-header" style={{ padding: '24px', border: '1px solid var(--border-subtle)' }}>
           <div style={{ position: 'relative', zIndex: 1 }}>
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '12px' }}>
-              <span className={`badge ${project.type === 'AI/ML' ? 'badge-success' : (project.type === 'Web App' || project.type === 'WEB APP' ? 'badge-warning' : 'badge-primary')} label-text`} style={{ padding: '4px 10px', fontSize: '0.72rem', textTransform: 'none' }}>{project.type} · {project.stage}</span>
+            <div className="flex gap-2 row" style={{ marginBottom: '12px' }}>
+              <span className="bg-indigo-900 text-indigo-300 text-xs px-3 py-1 rounded-full font-medium">
+                {project.type}
+              </span>
+              <span className="bg-orange-900 text-orange-300 text-xs px-3 py-1 rounded-full font-medium">
+                {project.stage}
+              </span>
             </div>
 
             <h1 className="h1-page" style={{ margin: '0 0 16px 0', fontSize: '1.8rem', fontWeight: 700 }}>
@@ -278,10 +288,12 @@ export default function ProjectDetail({ params }: { params: { id: string } }) {
                 <Users size={16} />
                 Team of {project.team_size}
               </div>
-              <div className="body-text" style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)' }}>
-                <Clock size={16} />
-                {formatMetaValue(project.commitment)}
-              </div>
+              {project.commitment && (
+                <span className="flex items-center gap-1">
+                  <ClockIcon className="w-4 h-4" />
+                  {project.commitment}
+                </span>
+              )}
               <div className="body-text" style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)' }}>
                 <Calendar size={16} />
                 Started {new Date(project.created_at).toLocaleDateString()}
@@ -300,14 +312,75 @@ export default function ProjectDetail({ params }: { params: { id: string } }) {
             <p className="body-text" style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.92rem', lineHeight: 1.5 }}>
               {project.description}
             </p>
+            {project.github_url && (
+              <div style={{ marginTop: '12px' }}>
+                <a
+                  href={project.github_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-indigo-400 text-sm hover:underline"
+                >
+                  🔗 View Repository
+                </a>
+              </div>
+            )}
+            {(() => {
+              const stages = ['Idea Stage', 'MVP', 'Beta', 'Launch'];
+              const currentIndex = stages.findIndex(s =>
+                project.stage?.toLowerCase().includes(s.toLowerCase())
+              );
+              return (
+                <div style={{ marginTop: '16px' }}>
+                  <p style={{ fontSize: '11px', color: '#9ca3af', fontWeight: 600, textTransform: 'uppercase', marginBottom: '12px' }}>Project Stage</p>
+                  <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                    {stages.map((stage, i) => (
+                      <div key={stage} style={{ display: 'flex', alignItems: 'center', flex: i < stages.length - 1 ? 1 : 'none' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                          <div style={{
+                            width: '16px', height: '16px', borderRadius: '50%',
+                            backgroundColor: i <= currentIndex ? (i < currentIndex ? '#22c55e' : '#6366f1') : 'transparent',
+                            border: `2px solid ${i < currentIndex ? '#22c55e' : i === currentIndex ? '#6366f1' : '#4b5563'}`
+                          }} />
+                          <span style={{
+                            fontSize: '11px', marginTop: '4px',
+                            color: i === currentIndex ? '#818cf8' : i < currentIndex ? '#4ade80' : '#6b7280',
+                            fontWeight: i === currentIndex ? 600 : 400
+                          }}>{stage}</span>
+                        </div>
+                        {i < stages.length - 1 && (
+                          <div style={{
+                            height: '2px', flex: 1, margin: '0 4px', marginBottom: '18px',
+                            backgroundColor: i < currentIndex ? '#22c55e' : '#374151'
+                          }} />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
           </div>
 
-          {milestones.length > 0 && (
-            <div className="bento-item">
-              <h2 className="h2-section" style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.2rem', fontWeight: 600 }}>
+          <div className="bento-item">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h2 className="h2-section" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.2rem', fontWeight: 600 }}>
                 Timeline
               </h2>
+              {isFounder && (
+                <Link href={`/projects/${project.id}/manage`}>
+                  <button className="btn-ghost" style={{ padding: '6px 12px', fontSize: '0.8rem', borderRadius: 'var(--radius-sm)' }}>
+                    + Add Milestone
+                  </button>
+                </Link>
+              )}
+            </div>
 
+            {milestones.length === 0 ? (
+              <div className="text-gray-500 text-center py-4" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                <Calendar size={28} style={{ opacity: 0.6 }} />
+                <span>No milestones added yet.</span>
+              </div>
+            ) : (
               <div style={{ position: 'relative', paddingLeft: '24px' }}>
                 {/* Vertical Dashed Line */}
                 <div style={{ position: 'absolute', left: '7px', top: '8px', bottom: '8px', width: '2px', background: 'var(--border-subtle)' }}></div>
@@ -349,8 +422,8 @@ export default function ProjectDetail({ params }: { params: { id: string } }) {
                   })}
                 </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
           {project.github_url && (
             <div className="bento-item">
@@ -404,11 +477,7 @@ export default function ProjectDetail({ params }: { params: { id: string } }) {
                   <div key={e.id} style={{ background: 'var(--bg-interactive-neutral)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-lg)', padding: '16px' }}>
                     <p className="body-text" style={{ color: 'var(--text-primary)', margin: '0 0 12px 0', fontSize: '0.9rem', lineHeight: 1.5 }}>{e.note}</p>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <img
-                        src={e.users?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(e.users?.full_name || 'Faculty')}&background=d0d7de&color=24292f`}
-                        alt={e.users?.full_name}
-                        style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover' }}
-                      />
+                      <Avatar src={e.users?.avatar_url} name={e.users?.full_name || 'Faculty'} size={7} />
                       <div>
                         <div className="body-text text-bold" style={{ color: 'var(--text-primary)', fontSize: '0.82rem' }}>{e.users?.full_name || 'Faculty Member'}</div>
                         <div className="meta-text" style={{ fontSize: '0.72rem' }}>{e.users?.university}</div>
@@ -450,22 +519,25 @@ export default function ProjectDetail({ params }: { params: { id: string } }) {
         {/* Sticky Sidebar */}
         <div className="bento-sidebar">
 
-          {/* Actions Block */}
-          {(isFounder || !(userRole === 'admin' || userRole === 'faculty')) && (
-            <div className="bento-item" style={{ padding: '20px' }}>
-              {isFounder ? (
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{ width: '48px', height: '48px', borderRadius: 'var(--radius-md)', background: 'var(--semantic-primary-bg)', border: '1px solid var(--semantic-primary-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px auto' }}>
-                    <Crown size={24} color="var(--semantic-primary)" />
-                  </div>
-                  <h3 className="h3-card" style={{ marginBottom: '6px', fontSize: '1rem', fontWeight: 600 }}>You lead this team</h3>
-                  <p className="body-text" style={{ color: 'var(--text-secondary)', marginBottom: '16px', fontSize: '0.85rem', lineHeight: 1.4 }}>Manage membership pitches, timelines, and credentials.</p>
-                  <Link href={`/projects/${project.id}/manage`}>
-                    <button className="btn-primary body-text" style={{ width: '100%', padding: '10px', borderRadius: 'var(--radius-sm)', fontSize: '0.9rem' }}>
-                      Manage workspace
-                    </button>
-                  </Link>
-                </div>
+           {/* Actions Block */}
+           {(isFounder || !(userRole === 'admin' || userRole === 'faculty')) && (
+             <div id="sidebar-actions-block" className="bento-item" style={{ padding: '20px' }}>
+               {isFounder ? (
+                 <div style={{ textAlign: 'center' }}>
+                   <div className="bg-gray-800 rounded-xl" style={{ width: '48px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px auto' }}>
+                     <Crown size={24} color="var(--semantic-primary)" />
+                   </div>
+                   <h3 className="h3-card" style={{ marginBottom: '6px', fontSize: '1rem', fontWeight: 600 }}>You lead this team</h3>
+                   <p className="body-text" style={{ color: 'var(--text-secondary)', marginBottom: '8px', fontSize: '0.85rem', lineHeight: 1.4 }}>Manage membership pitches, timelines, and credentials.</p>
+                   <p className="text-sm text-gray-400" style={{ marginBottom: '16px' }}>
+                     {teamMembers.length + 1} members • {milestones.length} milestones • {applicationCount} applications
+                   </p>
+                   <Link href={`/projects/${project.id}/manage`} style={{ width: '100%' }}>
+                     <button className="bg-indigo-700 hover:bg-indigo-600 text-white rounded-lg py-2 w-full transition-colors" style={{ fontSize: '0.9rem' }}>
+                       Manage workspace
+                     </button>
+                   </Link>
+                 </div>
               ) : isAcceptedMember ? (
                 <div style={{ textAlign: 'center' }}>
                   <div style={{ width: '48px', height: '48px', borderRadius: 'var(--radius-md)', background: 'var(--semantic-success-bg)', border: '1px solid var(--semantic-success-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px auto' }}>
@@ -553,7 +625,7 @@ export default function ProjectDetail({ params }: { params: { id: string } }) {
             </h3>
             {project.project_skills?.length > 0 ? (
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                {project.project_skills.map((skill: any) => (
+                {(showAllSkills ? project.project_skills : project.project_skills.slice(0, 4)).map((skill: any) => (
                   <span
                     key={skill.skill_name}
                     className="label-text"
@@ -571,6 +643,42 @@ export default function ProjectDetail({ params }: { params: { id: string } }) {
                     {skill.skill_name}
                   </span>
                 ))}
+                {!showAllSkills && project.project_skills.length > 4 && (
+                  <button
+                    onClick={() => setShowAllSkills(true)}
+                    className="label-text cursor-pointer hover:bg-gray-800"
+                    style={{
+                      padding: '3px 8px',
+                      borderRadius: 'var(--radius-sm)',
+                      background: 'var(--bg-interactive-neutral)',
+                      border: '1px solid var(--border-subtle)',
+                      color: 'var(--semantic-primary)',
+                      fontSize: '0.72rem',
+                      fontWeight: 600,
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    +{project.project_skills.length - 4} more
+                  </button>
+                )}
+                {showAllSkills && project.project_skills.length > 4 && (
+                  <button
+                    onClick={() => setShowAllSkills(false)}
+                    className="label-text cursor-pointer hover:bg-gray-800"
+                    style={{
+                      padding: '3px 8px',
+                      borderRadius: 'var(--radius-sm)',
+                      background: 'var(--bg-interactive-neutral)',
+                      border: '1px solid var(--border-subtle)',
+                      color: 'var(--semantic-primary)',
+                      fontSize: '0.72rem',
+                      fontWeight: 600,
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    show less
+                  </button>
+                )}
               </div>
             ) : (
               <span className="body-text" style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>No specific skills listed.</span>
@@ -579,19 +687,20 @@ export default function ProjectDetail({ params }: { params: { id: string } }) {
 
           {/* Active Team Block */}
           <div className="bento-item" style={{ padding: '20px' }}>
-            <h3 className="h3-card" style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.95rem', fontWeight: 600 }}>
-              <Users size={16} /> Active Roster
-            </h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3 className="h3-card" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.95rem', fontWeight: 600 }}>
+                <Users size={16} /> Active Roster
+              </h3>
+              <span className="text-xs text-gray-400">
+                {teamMembers.length + 1} / {project.team_size} members
+              </span>
+            </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <Link href={`/profile/${project.founder_id}`} style={{ textDecoration: 'none' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px', background: 'var(--bg-interactive-neutral)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)' }}>
                   <div style={{ position: 'relative' }}>
-                    <img
-                      src={project.users?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(project.users?.full_name || 'Anonymous')}&background=d0d7de&color=24292f`}
-                      alt={project.users?.full_name}
-                      style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover' }}
-                    />
+                    <Avatar src={project.users?.avatar_url} name={project.users?.full_name || 'Anonymous'} size={9} />
                     <div style={{ position: 'absolute', bottom: '-2px', right: '-2px', width: '14px', height: '14px', background: 'var(--bg-card)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <Crown size={8} color="var(--semantic-primary)" />
                     </div>
@@ -606,11 +715,7 @@ export default function ProjectDetail({ params }: { params: { id: string } }) {
               {teamMembers.map((member, index) => (
                 <Link key={index} href={`/profile/${member.applicant_id}`} style={{ textDecoration: 'none' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px', background: 'var(--bg-interactive-neutral)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)' }}>
-                    <img
-                      src={member.users?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.users?.full_name || 'Anonymous')}&background=d0d7de&color=24292f`}
-                      alt={member.users?.full_name}
-                      style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover' }}
-                    />
+                    <Avatar src={member.users?.avatar_url} name={member.users?.full_name || 'Anonymous'} size={9} />
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div className="body-text text-bold" style={{ color: 'var(--text-primary)', fontSize: '0.82rem' }}>{member.users?.full_name || 'Anonymous'}</div>
                       <div className="meta-text" style={{ marginTop: '2px', fontSize: '0.72rem' }}>Member</div>
@@ -618,8 +723,20 @@ export default function ProjectDetail({ params }: { params: { id: string } }) {
                   </div>
                 </Link>
               ))}
+
+              {(() => {
+                const totalSlots = parseInt(project.team_size) || 1;
+                const filledSlots = teamMembers.length + 1;
+                const openSlotsCount = Math.max(0, totalSlots - filledSlots);
+                return Array.from({ length: openSlotsCount }).map((_, idx) => (
+                  <div key={`open-slot-${idx}`} className="border border-dashed border-gray-600 rounded-xl p-3 text-gray-500 text-sm text-center">
+                    Open Slot
+                  </div>
+                ));
+              })()}
             </div>
           </div>
+
         </div>
       </div>
     </main>

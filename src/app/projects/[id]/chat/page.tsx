@@ -5,6 +5,7 @@ import { supabase } from '../../../../lib/supabase';
 import { useRouter } from 'next/navigation';
 import { Send } from 'lucide-react';
 import BackButton from '../../../../components/BackButton';
+import { Avatar } from '../../../../components/Avatar';
 
 export default function TeamChat({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -189,11 +190,7 @@ export default function TeamChat({ params }: { params: { id: string } }) {
                 return (
                   <div key={msg.id || idx} style={{ display: 'flex', flexDirection: isMe ? 'row-reverse' : 'row', gap: '12px', alignItems: 'flex-end' }}>
                     {!isMe && (
-                      <img
-                        src={msg.users?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(msg.users?.full_name || 'User')}&background=d0d7de&color=24292f`}
-                        alt={msg.users?.full_name}
-                        style={{ width: '32px', height: '32px', borderRadius: '50%' }}
-                      />
+                      <Avatar src={msg.users?.avatar_url} name={msg.users?.full_name} size={8} />
                     )}
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: isMe ? 'flex-end' : 'flex-start', maxWidth: '70%' }}>
                       {!isMe && <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '4px', marginLeft: '4px' }}>{msg.users?.full_name}</span>}
@@ -249,11 +246,7 @@ export default function TeamChat({ params }: { params: { id: string } }) {
               {/* Founder */}
               {project && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <img
-                    src={project.users?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(project.users?.full_name || 'Founder')}&background=d0d7de&color=24292f`}
-                    alt={project.users?.full_name}
-                    style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover' }}
-                  />
+                  <Avatar src={project.users?.avatar_url} name={project.users?.full_name || 'Founder'} size={7} />
                   <div style={{ minWidth: 0, flex: 1 }}>
                     <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
                       {project.users?.full_name}
@@ -267,11 +260,7 @@ export default function TeamChat({ params }: { params: { id: string } }) {
               {/* Members */}
               {teamMembers.map((member, index) => (
                 <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <img
-                    src={member.users?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.users?.full_name || 'Member')}&background=d0d7de&color=24292f`}
-                    alt={member.users?.full_name}
-                    style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover' }}
-                  />
+                  <Avatar src={member.users?.avatar_url} name={member.users?.full_name || 'Member'} size={7} />
                   <div style={{ minWidth: 0, flex: 1 }}>
                     <div style={{ fontSize: '0.82rem', fontWeight: 500, color: 'var(--text-primary)', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
                       {member.users?.full_name}

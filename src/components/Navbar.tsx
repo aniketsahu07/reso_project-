@@ -25,7 +25,7 @@ export default function Navbar() {
           .select('university, role')
           .eq('id', user.id)
           .single();
-          
+
         if (profile) {
           if (!profile.university && profile.role !== 'admin' && profile.role !== 'faculty') {
             router.push('/onboarding');
@@ -33,34 +33,48 @@ export default function Navbar() {
           setUserRole(profile.role || 'student');
         }
 
-        const { data: myProjects } = await supabase.from('projects').select('id').eq('founder_id', user.id);
-        const myProjIds = myProjects ? myProjects.map(p => p.id) : [];
+        // First get all project IDs the user leads
+        const { data: userProjects } = await supabase
+          .from('projects')
+          .select('id')
+          .eq('founder_id', user.id);
 
-        if (myProjIds.length > 0) {
-          const { count } = await supabase
-            .from('applications')
-            .select('*', { count: 'exact', head: true })
-            .in('project_id', myProjIds)
-            .eq('status', 'Pending')
-            .eq('is_read', false);
-          if (count) setPendingCount(count);
+        const projectIds = userProjects?.map(p => p.id) || [];
+        const myProjIds = projectIds;
+
+        if (typeof window !== 'undefined') {
+          if (pathname === '/dashboard' || (pathname.includes('/projects/') && pathname.includes('/manage'))) {
+            localStorage.setItem('lastSeenApplications', new Date().toISOString());
+          }
         }
+
+        const lastSeen = typeof window !== 'undefined' ? localStorage.getItem('lastSeenApplications') : null;
+
+        // Then count only pending applications for those projects
+        const { count } = await supabase
+          .from('applications')
+          .select('*', { count: 'exact', head: true })
+          .in('project_id', projectIds)
+          .eq('status', 'Pending')
+          .gt('created_at', lastSeen || '1970-01-01');
+
+        setPendingCount(count || 0);
 
         const { data: appsData } = await supabase
           .from('applications')
           .select('project_id')
           .eq('applicant_id', user.id)
           .eq('status', 'Accepted');
-          
+
         const allProjIds = [...myProjIds, ...(appsData ? appsData.map(a => a.project_id) : [])];
-        
+
         if (allProjIds.length > 0) {
           const { data: receipts } = await supabase
             .from('chat_read_receipts')
             .select('project_id, last_read_at')
             .eq('user_id', user.id)
             .in('project_id', allProjIds);
-            
+
           const receiptsMap = new Map();
           if (receipts) {
             receipts.forEach(r => receiptsMap.set(r.project_id, r.last_read_at));
@@ -91,6 +105,14 @@ export default function Navbar() {
   };
 
   const closeMenu = () => setIsMobileMenuOpen(false);
+
+  const handleDashboardClick = () => {
+    setPendingCount(0);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('lastSeenApplications', new Date().toISOString());
+    }
+    closeMenu();
+  };
 
   const isActive = (path: string) => pathname === path ? 'nav-link active' : 'nav-link';
 
@@ -123,10 +145,10 @@ export default function Navbar() {
             )}
             {(userRole !== 'admin' && userRole !== 'faculty') && (
               <>
-                <Link href="/dashboard" className={isActive('/dashboard')} onClick={closeMenu} style={{ position: 'relative' }}>
+                <Link href="/dashboard" className={isActive('/dashboard')} onClick={handleDashboardClick} style={{ position: 'relative' }}>
                   Dashboard
                   {pendingCount > 0 && (
-                    <span className="badge-notification">
+                    <span className="absolute -top-1 -right-2 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
                       {pendingCount}
                     </span>
                   )}

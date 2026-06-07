@@ -6,6 +6,7 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../components/AuthProvider';
 import Link from 'next/link';
 import { MessageSquare, ChevronRight, Send } from 'lucide-react';
+import { Avatar } from '../../components/Avatar';
 
 export default function ChatHub() {
   const router = useRouter();
@@ -265,11 +266,9 @@ export default function ChatHub() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {previewMembers.map((member, idx) => (
                     <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <img
-                        src={member.users?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.users?.full_name || 'Member')}&background=d0d7de&color=24292f`}
-                        alt={member.users?.full_name}
-                        style={{ width: '22px', height: '22px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
-                      />
+                      <div style={{ flexShrink: 0, display: 'inline-flex' }}>
+                        <Avatar src={member.users?.avatar_url} name={member.users?.full_name || 'Member'} size={5.5} />
+                      </div>
                       <div style={{ minWidth: 0, flex: 1 }}>
                         <div style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--text-primary)', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
                           {member.users?.full_name}
@@ -376,11 +375,7 @@ export default function ChatHub() {
                   ) : (
                     previewMessages.map((msg, idx) => (
                       <div key={msg.id || idx} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
-                        <img
-                          src={msg.users?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(msg.users?.full_name || 'User')}&background=d0d7de&color=24292f`}
-                          alt={msg.users?.full_name}
-                          style={{ width: '28px', height: '28px', borderRadius: '50%' }}
-                        />
+                        <Avatar src={msg.users?.avatar_url} name={msg.users?.full_name} size={7} />
                         <div style={{ minWidth: 0, flex: 1 }}>
                           <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
                             <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-primary)' }}>{msg.users?.full_name}</span>

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '../../lib/supabase';
-import { Clock, Users as UsersIcon, ChevronRight, Compass } from 'lucide-react';
+import { Clock as ClockIcon, Users as UsersIcon, ChevronRight, Compass } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '../../components/AuthProvider';
 
@@ -236,9 +236,12 @@ export default function Dashboard() {
                     <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                       <UsersIcon size={12} /> {project.team_size} members
                     </span>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <Clock size={12} /> {project.commitment}
-                    </span>
+                    {project.commitment && (
+                      <span className="flex items-center gap-1">
+                        <ClockIcon className="w-4 h-4" />
+                        {project.commitment}
+                      </span>
+                    )}
                   </div>
                   <Link href={`/projects/${project.id}/manage`} style={{ width: '100%' }}>
                     <button className="btn-ghost body-text" style={{

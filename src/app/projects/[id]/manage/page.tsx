@@ -3,15 +3,17 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../../../lib/supabase';
 import { useRouter } from 'next/navigation';
-import { Check, X, Clock, Plus, GitBranch, Trash2, AlertTriangle } from 'lucide-react';
+import { Check, X, Clock, Plus, GitBranch, Trash2, AlertTriangle as AlertTriangleIcon, Calendar as CalendarIcon } from 'lucide-react';
 import BackButton from '../../../../components/BackButton';
 import Link from 'next/link';
+import { Avatar } from '../../../../components/Avatar';
 
 export default function ManageProject({ params }: { params: { id: string } }) {
   const router = useRouter();
   const { id } = params;
 
   const [project, setProject] = useState<any>(null);
+  const [profile, setProfile] = useState<any>(null);
   const [applications, setApplications] = useState<any[]>([]);
   const [milestones, setMilestones] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -151,6 +153,16 @@ export default function ManageProject({ params }: { params: { id: string } }) {
 
       setProject(projectData);
       setGithubUrl(projectData.github_url || "");
+
+      const { data: profileData } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', projectData.founder_id)
+        .single();
+
+      if (profileData) {
+        setProfile(profileData);
+      }
 
       const { data: appsData } = await supabase
         .from('applications')
@@ -306,15 +318,41 @@ export default function ManageProject({ params }: { params: { id: string } }) {
     );
   }
 
+  const memberCount = applications.filter(a => a.status === 'Accepted').length + 1;
+  const milestoneCount = milestones.length;
+
+  const teamMembers = [
+    {
+      id: project?.founder_id,
+      users: {
+        full_name: profile?.full_name || 'Myself (Founder)'
+      }
+    },
+    ...applications.filter(a => a.status === 'Accepted').map(a => {
+      const applicant = Array.isArray(a.users) ? a.users[0] : a.users;
+      return {
+        id: a.applicant_id,
+        users: {
+          full_name: applicant?.full_name || 'Anonymous'
+        }
+      };
+    })
+  ].filter(member => member && member.id);
+
   return (
     <main className="main-content" style={{ maxWidth: 'min(1400px, 90vw)' }}>
       <BackButton href="/dashboard" text="Back to Dashboard" />
 
       <div style={{ marginBottom: '32px' }}>
-        <h1 className="section-title" style={{ fontSize: '2.5rem', marginBottom: '8px' }}>{project.title}</h1>
+        <div className="flex items-center gap-3 mb-1">
+          <h1 className="text-4xl font-bold text-white">{project.title}</h1>
+          <span className="text-xs px-3 py-1 rounded-full bg-indigo-900 text-indigo-300 font-medium">
+            {project.type}
+          </span>
+        </div>
         <p style={{ color: 'var(--text-secondary)', fontSize: '1.05rem' }}>Manage your team and track your progress.</p>
         <p className="text-sm text-gray-400" style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginTop: '8px', opacity: 0.8 }}>
-          {applications.filter(a => a.status === 'Accepted').length + 1} members • {milestones.length} milestones • Started {(() => {
+          {memberCount} {memberCount === 1 ? 'member' : 'members'} • {milestoneCount} {milestoneCount === 1 ? 'milestone' : 'milestones'} • Started {(() => {
             const d = new Date(project.created_at);
             return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`;
           })()}
@@ -327,39 +365,39 @@ export default function ManageProject({ params }: { params: { id: string } }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           <div>
             <h2 style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--semantic-success)', marginBottom: '16px' }}>Active Roster</h2>
-            {applications.filter(a => a.status === 'Accepted').length === 0 ? (
-              <div className="card" style={{ padding: '32px', textAlign: 'center' }}>
-                <p style={{ color: 'var(--text-secondary)' }}>No active team members yet.</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div className="flex items-center gap-3 p-3 bg-gray-800 rounded-xl mb-2">
+                <Avatar src={profile?.avatar_url} name={profile?.full_name} size={9} />
+                <div>
+                  <p className="text-white text-sm font-medium">{profile?.full_name}</p>
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-green-900 text-green-400">Founder</span>
+                </div>
               </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {applications.filter(a => a.status === 'Accepted').map(app => {
-                  const applicant = Array.isArray(app.users) ? app.users[0] : app.users;
-                  return (
-                    <div key={app.id} className="card" style={{ padding: '16px', borderLeft: '3px solid var(--semantic-success)' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-                        <Link href={`/profile/${app.applicant_id}`} style={{ textDecoration: 'none' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
-                            <img
-                              src={applicant?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(applicant?.full_name || 'Anonymous')}&background=d0d7de&color=24292f`}
-                              alt={applicant?.full_name || 'Anonymous'}
-                              style={{ width: '44px', height: '44px', borderRadius: '50%', border: '2px solid var(--semantic-primary-border)', objectFit: 'cover' }}
-                            />
-                            <div>
-                              <h3 style={{ fontSize: '1.05rem', fontWeight: 500, color: 'var(--text-primary)', margin: 0 }}>{applicant?.full_name || 'Anonymous'}</h3>
-                              <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '2px' }}>{applicant?.university || 'University not specified'}</div>
-                            </div>
+
+              {applications.filter(a => a.status === 'Accepted').map(app => {
+                const applicant = Array.isArray(app.users) ? app.users[0] : app.users;
+                return (
+                  <div key={app.id} className="card" style={{ padding: '16px', borderLeft: '3px solid var(--semantic-success)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+                      <Link href={`/profile/${app.applicant_id}`} style={{ textDecoration: 'none' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
+                          <div style={{ border: '2px solid var(--semantic-primary-border)', borderRadius: '50%', display: 'inline-flex' }}>
+                            <Avatar src={applicant?.avatar_url} name={applicant?.full_name || 'Anonymous'} size={11} />
                           </div>
-                        </Link>
-                        <button onClick={() => updateStatus(app.id, 'Removed')} className="btn-ghost" style={{ padding: '8px 16px', color: 'var(--semantic-error)', border: '1px solid var(--semantic-error-border)', fontSize: '0.85rem' }}>
-                          Remove
-                        </button>
-                      </div>
+                          <div>
+                            <h3 style={{ fontSize: '1.05rem', fontWeight: 500, color: 'var(--text-primary)', margin: 0 }}>{applicant?.full_name || 'Anonymous'}</h3>
+                            <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '2px' }}>{applicant?.university || 'University not specified'}</div>
+                          </div>
+                        </div>
+                      </Link>
+                      <button onClick={() => updateStatus(app.id, 'Removed')} className="btn-ghost" style={{ padding: '8px 16px', color: 'var(--semantic-error)', border: '1px solid var(--semantic-error-border)', fontSize: '0.85rem' }}>
+                        Remove
+                      </button>
                     </div>
-                  );
-                })}
-              </div>
-            )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
           <div>
@@ -377,11 +415,9 @@ export default function ManageProject({ params }: { params: { id: string } }) {
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                           <Link href={`/profile/${app.applicant_id}`}>
-                            <img
-                              src={applicant?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(applicant?.full_name || 'Anonymous')}&background=d0d7de&color=24292f`}
-                              alt={applicant?.full_name || 'Anonymous'}
-                              style={{ width: '48px', height: '48px', borderRadius: '50%', border: '2px solid var(--semantic-primary-border)', cursor: 'pointer', objectFit: 'cover' }}
-                            />
+                            <div style={{ border: '2px solid var(--semantic-primary-border)', borderRadius: '50%', display: 'inline-flex', cursor: 'pointer' }}>
+                              <Avatar src={applicant?.avatar_url} name={applicant?.full_name || 'Anonymous'} size={12} />
+                            </div>
                           </Link>
                           <div>
                             <Link href={`/profile/${app.applicant_id}`} style={{ textDecoration: 'none' }}>
@@ -468,21 +504,16 @@ export default function ManageProject({ params }: { params: { id: string } }) {
                     onChange={(e) => setMilestoneDue(e.target.value)}
                   />
                   <select
-                    className="search-field"
-                    style={{ appearance: 'none', width: '50%' }}
+                    className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm w-1/2"
                     value={milestoneAssigned}
                     onChange={(e) => setMilestoneAssigned(e.target.value)}
                   >
                     <option value="">Assign to (Optional)</option>
-                    <option value={project.founder_id}>Myself (Founder)</option>
-                    {applications.filter(a => a.status === 'Accepted').map(a => {
-                      const applicant = Array.isArray(a.users) ? a.users[0] : a.users;
-                      return (
-                        <option key={a.applicant_id} value={a.applicant_id}>
-                          {applicant?.full_name || 'Anonymous'}
-                        </option>
-                      );
-                    })}
+                    {teamMembers.map(member => (
+                      <option key={member.id} value={member.id}>
+                        {member.users?.full_name}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <textarea
@@ -493,7 +524,7 @@ export default function ManageProject({ params }: { params: { id: string } }) {
                   value={milestoneDesc}
                   onChange={(e) => setMilestoneDesc(e.target.value)}
                 />
-                <button type="submit" disabled={postingMilestone} className="btn-primary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px' }}>
+                <button type="submit" disabled={postingMilestone} className="btn-primary bg-indigo-600 hover:bg-indigo-700 text-white" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px' }}>
                   <Plus size={16} /> {postingMilestone ? 'Posting...' : 'Add Milestone'}
                 </button>
               </form>
@@ -521,7 +552,7 @@ export default function ManageProject({ params }: { params: { id: string } }) {
                   onChange={(e) => setGithubUrl(e.target.value)}
                 />
                 <button
-                  className="btn-primary"
+                  className="btn-primary bg-gray-700 hover:bg-gray-600 text-white"
                   onClick={handleSaveGithub}
                   disabled={savingGithub || githubUrl === project.github_url}
                   style={{ padding: '10px 24px' }}
@@ -600,7 +631,7 @@ export default function ManageProject({ params }: { params: { id: string } }) {
                   )}
                   <button
                     onClick={handleGenerateRoadmap}
-                    className="btn-primary w-full bg-purple-600 hover:bg-purple-700 text-white"
+                    className="btn-primary w-full bg-indigo-600 hover:bg-indigo-700 text-white"
                     style={{
                       width: '100%',
                       display: 'flex',
@@ -612,16 +643,9 @@ export default function ManageProject({ params }: { params: { id: string } }) {
                       padding: '12px',
                       borderRadius: '8px',
                       border: 'none',
-                      background: '#a855f7',
                       color: '#ffffff',
                       cursor: 'pointer',
                       transition: 'background-color 0.2s'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = '#9333ea';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = '#a855f7';
                     }}
                   >
                     Generate roadmap
@@ -633,7 +657,7 @@ export default function ManageProject({ params }: { params: { id: string } }) {
         </div>
 
         {/* Right Column */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', minHeight: '100%' }}>
+        <div className="min-h-full" style={{ display: 'flex', flexDirection: 'column', gap: '24px', minHeight: '100%' }}>
           {/* Past Milestones */}
           <div>
             <h2 className="text-lg font-semibold mb-3" style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '12px', color: 'var(--text-primary)' }}>Past Milestones</h2>
@@ -660,8 +684,9 @@ export default function ManageProject({ params }: { params: { id: string } }) {
             )}
 
             {milestones.length === 0 ? (
-              <div className="card" style={{ padding: '24px', textAlign: 'center' }}>
-                <p style={{ color: 'var(--text-secondary)' }}>No milestones yet. Post your first milestone above ↑</p>
+              <div className="text-center py-8 text-gray-500">
+                <CalendarIcon className="w-8 h-8 mx-auto mb-2 text-gray-600" />
+                <p className="text-sm">No milestones yet. Post your first milestone above ↑</p>
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -796,10 +821,12 @@ export default function ManageProject({ params }: { params: { id: string } }) {
           </div>
 
           {/* Danger Zone */}
-          <div style={{ marginTop: '32px' }} className="mt-8">
-            <h2 className="text-lg font-semibold mb-3" style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '12px', color: 'var(--semantic-error)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <AlertTriangle size={20} /> Danger Zone
-            </h2>
+          <div className="mt-16">
+            <div className="flex items-center gap-2 text-red-400 font-semibold text-lg mb-3">
+              <AlertTriangleIcon className="w-5 h-5" />
+              Danger Zone
+            </div>
+            <p className="text-gray-400 text-xs mb-4">⚠️ These actions are irreversible and cannot be undone.</p>
             <div className="card border-l-4 border-red-600" style={{ padding: '24px', border: '1px solid var(--semantic-error-border)', borderLeft: '4px solid #dc2626', background: 'var(--semantic-error-bg)' }}>
               <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '8px' }}>Delete Project</h3>
               <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '16px', lineHeight: 1.5 }}>
@@ -823,6 +850,12 @@ export default function ManageProject({ params }: { params: { id: string } }) {
               </button>
             </div>
           </div>
+
+          {milestones.length === 0 && (
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 mt-6 text-center text-gray-500 text-sm">
+              <p>📊 Project activity will appear here as your team grows.</p>
+            </div>
+          )}
         </div>
 
       </div>

@@ -5,6 +5,7 @@ import { supabase } from '../../../lib/supabase';
 import BackButton from '../../../components/BackButton';
 import { Award, GraduationCap } from 'lucide-react';
 import Link from 'next/link';
+import { Avatar } from '../../../components/Avatar';
 
 const truncateText = (text: string, limit: number) => {
   if (!text) return 'No description provided.';
@@ -195,11 +196,9 @@ export default function PublicProfile({ params }: { params: { id: string } }) {
         <div className="bento-item bento-header" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div style={{ position: 'absolute', inset: 0, height: '100px', background: 'var(--bg-card-hover)' }}></div>
           <div style={{ position: 'relative', display: 'flex', alignItems: 'flex-start', gap: '24px', flexWrap: 'wrap', zIndex: 1, marginTop: '24px' }}>
-            <img
-              src={profile.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.full_name)}&background=d0d7de&color=24292f`}
-              alt={profile.full_name}
-              style={{ width: '100px', height: '100px', borderRadius: '50%', border: '4px solid var(--bg-card)' }}
-            />
+            <div style={{ border: '4px solid var(--bg-card)', borderRadius: '50%', display: 'inline-flex' }}>
+              <Avatar src={profile.avatar_url} name={profile.full_name} size={25} />
+            </div>
             <div style={{ flex: 1, minWidth: 'min(100%, 360px)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '6px' }}>
                 <h1 className="h1-page" style={{ margin: 0, fontSize: '1.5rem', fontWeight: 700 }}>{profile.full_name}</h1>

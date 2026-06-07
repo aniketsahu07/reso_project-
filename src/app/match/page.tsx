@@ -7,6 +7,7 @@ import { Cpu, Award, Users as UsersIcon, Clock as ClockIcon, ArrowRight } from '
 
 import { useAuth } from '../../components/AuthProvider';
 import { supabase } from '../../lib/supabase';
+import { Avatar } from '../../components/Avatar';
 
 function truncateAtWord(text: string, maxChars: number): string {
   if (!text) return '';
@@ -515,11 +516,9 @@ export default function SkillMatchPage() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border-color)', paddingTop: '16px', marginTop: 'auto' }}>
                     {/* Founder Row */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <img
-                        src={project.founderAvatar}
-                        alt={project.founder}
-                        style={{ width: '28px', height: '28px', borderRadius: '50%', border: '1px solid var(--border-color)' }}
-                      />
+                      <div style={{ border: '1px solid var(--border-color)', borderRadius: '50%', display: 'inline-flex' }}>
+                        <Avatar src={project.founderAvatar} name={project.founder} size={7} />
+                      </div>
                       <div>
                         <div style={{ fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-primary)' }}>
                           {project.founder}
@@ -536,9 +535,12 @@ export default function SkillMatchPage() {
                         <span className="flex items-center gap-1">
                           <UsersIcon className="w-4 h-4" /> {project.team_size}
                         </span>
-                        <span className="flex items-center gap-1">
-                          <ClockIcon className="w-4 h-4" /> {project.commitment}
-                        </span>
+                        {project.commitment && (
+                          <span className="flex items-center gap-1">
+                            <ClockIcon className="w-4 h-4" />
+                            {project.commitment}
+                          </span>
+                        )}
                       </div>
 
                       <Link href={`/projects/${project.id}`}>

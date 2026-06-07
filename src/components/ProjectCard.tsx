@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState } from 'react';
-import { ChevronRight, Users, Clock } from 'lucide-react';
+import { ChevronRight, Users, Clock as ClockIcon } from 'lucide-react';
 import Link from 'next/link';
+import { Avatar } from './Avatar';
 
 export default function ProjectCard({ project }: { project: any }) {
   const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({});
@@ -28,15 +29,9 @@ export default function ProjectCard({ project }: { project: any }) {
           }}>
             {project.type}
           </span>
-          <img
-            src={project.founderAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(project.founder || 'User')}&background=1a1a1a&color=4f46e5`}
-            alt={project.founder}
-            style={{
-              width: '30px', height: '30px', borderRadius: '50%',
-              border: '1.5px solid #2a2a2a',
-              flexShrink: 0
-            }}
-          />
+          <div style={{ border: '1.5px solid #2a2a2a', borderRadius: '50%', flexShrink: 0, display: 'inline-flex' }}>
+            <Avatar src={project.founderAvatar} name={project.founder} size={7.5} />
+          </div>
         </div>
 
         {/* Title */}
@@ -177,9 +172,12 @@ export default function ProjectCard({ project }: { project: any }) {
           <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
             <Users size={12} /> {project.teamSize}
           </span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <Clock size={12} /> {project.commitment}
-          </span>
+          {project.commitment && (
+            <span className="flex items-center gap-1">
+              <ClockIcon className="w-4 h-4" />
+              {project.commitment}
+            </span>
+          )}
         </div>
         <Link href={`/projects/${project.id}`}>
           <button

@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { CheckCircle, ExternalLink, Code, Crown, Briefcase, Calendar, Edit3 } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '../../components/AuthProvider';
+import { Avatar } from '../../components/Avatar';
 
 const renderBio = (bioText: string) => {
   if (!bioText || bioText.trim() === "" || bioText.trim() === "/") {
@@ -35,7 +36,6 @@ export default function Profile() {
   const [profile, setProfile] = useState<any>(null);
   const [portfolio, setPortfolio] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [avatarError, setAvatarError] = useState(false);
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
 
@@ -234,33 +234,9 @@ export default function Profile() {
 
           {/* LEFT — Avatar */}
           <div style={{ position: 'relative', flexShrink: 0, width: '84px', height: '84px' }}>
-            {profile?.avatar_url && !avatarError ? (
-              <img
-                src={profile.avatar_url}
-                alt={profile?.full_name}
-                onError={() => setAvatarError(true)}
-                style={{
-                  width: '84px', height: '84px', borderRadius: '50%',
-                  border: '2px solid var(--border-subtle)',
-                  objectFit: 'cover', background: 'var(--bg-card)', display: 'block'
-                }}
-              />
-            ) : (
-              <div
-                aria-label={profile?.full_name}
-                style={{
-                  width: '84px', height: '84px', borderRadius: '50%',
-                  border: '2px solid var(--border-subtle)',
-                  background: 'var(--semantic-primary-solid)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  color: 'var(--semantic-primary-fg)',
-                  letterSpacing: '-0.04em', textTransform: 'uppercase', fontSize: '1.75rem',
-                  fontWeight: 700
-                }}
-              >
-                {(profile?.full_name || 'A').trim().charAt(0) || 'A'}
-              </div>
-            )}
+            <div style={{ border: '2px solid var(--border-subtle)', borderRadius: '50%', display: 'inline-flex' }}>
+              <Avatar src={profile?.avatar_url} name={profile?.full_name} size={21} />
+            </div>
             {/* Online status dot — anchored to bottom-right corner of avatar */}
             {profile?.open_to_collaborate && (
               <div style={{
